@@ -1,0 +1,116 @@
+/* jijin — 自定义样式 */
+
+/* 中文排版优化 */
+html {
+  font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+/* 主标题 */
+.main .block-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+/* 卡片容器 — Streamlit border container */
+[data-testid="stExpander"] {
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+/* 风险提示条 */
+.disclaimer-banner {
+  background-color: #fff8e1;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #5d4037;
+}
+
+/* Metric 数字 */
+[data-testid="stMetricValue"] {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* 按钮 */
+.stButton > button {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.stButton > button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 侧边栏 */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Radio 按钮 */
+[data-testid="stSidebar"] .stRadio label {
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+[data-testid="stSidebar"] .stRadio label:hover {
+  background-color: rgba(37, 99, 235, 0.08);
+}
+
+/* 数据表格 */
+[data-testid="stDataFrame"] {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+/* 信号 badge — BUY */
+.st-buy {
+  background-color: #dcfce7;
+  color: #166534;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* 信号 badge — SELL */
+.st-sell {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* Chat message */
+[data-testid="stChatMessage"] {
+  border-radius: 12px;
+}
+
+[data-testid="stChatMessage"][data-testid="stChatMessage--assistant"] {
+  background-color: #f0f9ff;
+}
+
+/* 加载动画 */
+[data-testid="stSpinner"] {
+  color: #2563eb;
+}
+
+/* 功能卡片悬停 */
+[data-testid="stVerticalBlockBorderWrapper"] {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+[data-testid="stVerticalBlockBorderWrapper"]:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* 市场状态条 */
+.market-bar-item {
+  text-align: center;
+  padding: 8px 0;
+}
