@@ -46,8 +46,8 @@ def rsi(close: pd.Series, window: int = 14) -> pd.Series:
     gain = delta.where(delta > 0, 0.0)
     loss = (-delta).where(delta < 0, 0.0)
 
-    avg_gain = gain.ewm(alpha=1/window, adjust=False).mean()
-    avg_loss = loss.ewm(alpha=1/window, adjust=False).mean()
+    avg_gain = gain.ewm(alpha=1 / window, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=1 / window, adjust=False).mean()
 
     rs = avg_gain / avg_loss.replace(0, np.nan)
     rsi_value = 100 - (100 / (1 + rs))
@@ -55,7 +55,9 @@ def rsi(close: pd.Series, window: int = 14) -> pd.Series:
 
 
 def bollinger_bands(
-    close: pd.Series, window: int = 20, num_std: float = 2.0,
+    close: pd.Series,
+    window: int = 20,
+    num_std: float = 2.0,
 ) -> pd.DataFrame:
     """布林带。
 
@@ -67,14 +69,23 @@ def bollinger_bands(
     upper = middle + num_std * std
     lower = middle - num_std * std
     width = (upper - lower) / middle * 100
-    return pd.DataFrame({
-        "middle": middle, "upper": upper, "lower": lower, "width": width,
-    })
+    return pd.DataFrame(
+        {
+            "middle": middle,
+            "upper": upper,
+            "lower": lower,
+            "width": width,
+        }
+    )
 
 
 def kdj(
-    high: pd.Series, low: pd.Series, close: pd.Series,
-    n: int = 9, m1: int = 3, m2: int = 3,
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    n: int = 9,
+    m1: int = 3,
+    m2: int = 3,
 ) -> pd.DataFrame:
     """KDJ 随机指标。
 
@@ -86,8 +97,8 @@ def kdj(
     rsv = (close - lowest_low) / (highest_high - lowest_low) * 100
     rsv = rsv.fillna(50)
 
-    k = rsv.ewm(alpha=1/m1, adjust=False).mean()
-    d = k.ewm(alpha=1/m2, adjust=False).mean()
+    k = rsv.ewm(alpha=1 / m1, adjust=False).mean()
+    d = k.ewm(alpha=1 / m2, adjust=False).mean()
     j = 3 * k - 2 * d
 
     return pd.DataFrame({"K": k, "D": d, "J": j})
@@ -99,7 +110,9 @@ def volatility(returns: pd.Series, window: int = 20) -> pd.Series:
 
 
 def sharpe_rolling(
-    returns: pd.Series, window: int = 60, rf: float = 0.02,
+    returns: pd.Series,
+    window: int = 60,
+    rf: float = 0.02,
 ) -> pd.Series:
     """滚动夏普比率。"""
     roll_ret = returns.rolling(window).mean() * 252
@@ -109,9 +122,7 @@ def sharpe_rolling(
 
 def max_drawdown_rolling(nav: pd.Series, window: int = 60) -> pd.Series:
     """滚动最大回撤。"""
-    return nav.rolling(window).apply(
-        lambda x: (x / x.cummax() - 1).min()
-    ) * 100
+    return nav.rolling(window).apply(lambda x: (x / x.cummax() - 1).min()) * 100
 
 
 def compute_all_indicators(nav_df: pd.DataFrame) -> pd.DataFrame:

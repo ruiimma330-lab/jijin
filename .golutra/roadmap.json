@@ -1,0 +1,50 @@
+{
+  "roadmap": {
+    "objective": "Phase 1：零基础投资新手入门引导",
+    "tasks": [
+      {
+        "id": 1,
+        "number": "P1-01",
+        "title": "投资研究员：补充知识库（开户流程/基金概念/A股入门，面向零基础）",
+        "pinned": true,
+        "status": "done",
+        "sortOrder": 1
+      },
+      {
+        "id": 2,
+        "number": "P1-02",
+        "title": "后端工程师：修复并优化 notebooks/00-白话入门 和 01-第一笔基金数据，确保零基础可跑通",
+        "pinned": false,
+        "status": "done",
+        "sortOrder": 2
+      },
+      {
+        "id": 3,
+        "number": "P1-03",
+        "title": "前端工程师：新增新手引导页面 09_newcomer_guide.py（投资概念→开户→第一笔交易）",
+        "pinned": false,
+        "status": "done",
+        "sortOrder": 3
+      },
+      {
+        "id": 4,
+        "number": "P1-04",
+        "title": "质量监工：Phase 1 回归验证",
+        "pinned": false,
+        "status": "done",
+        "sortOrder": 4
+      },
+      {
+        "id": 5,
+        "number": "P1-05",
+        "title": "技术主管汇总向群主汇报",
+        "pinned": false,
+        "status": "done",
+        "sortOrder": 5
+      }
+    ]
+  },
+  "_roadmapMeta": {
+    "updatedAt": 1779524509511
+  }
+}

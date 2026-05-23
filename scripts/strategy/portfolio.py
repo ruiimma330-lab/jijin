@@ -48,7 +48,9 @@ def portfolio_returns(
 
 
 def portfolio_metrics(
-    weights: np.ndarray, mean_returns: np.ndarray, cov_matrix: np.ndarray,
+    weights: np.ndarray,
+    mean_returns: np.ndarray,
+    cov_matrix: np.ndarray,
     rf: float = 0.02,
 ) -> tuple[float, float, float]:
     """计算组合的收益、风险、夏普比率。
@@ -63,7 +65,9 @@ def portfolio_metrics(
 
 
 def max_sharpe_optimize(
-    mean_returns: np.ndarray, cov_matrix: np.ndarray, rf: float = 0.02,
+    mean_returns: np.ndarray,
+    cov_matrix: np.ndarray,
+    rf: float = 0.02,
 ) -> tuple[np.ndarray, float, float, float]:
     """最大化夏普比率 — 均值方差优化。
 
@@ -79,11 +83,14 @@ def max_sharpe_optimize(
 
     constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
     bounds = [(0.05, 0.50) for _ in range(n)]
-    x0 = np.array([1/n] * n)
+    x0 = np.array([1 / n] * n)
 
     result = minimize(
-        neg_sharpe, x0, method="SLSQP",
-        bounds=bounds, constraints=constraints,
+        neg_sharpe,
+        x0,
+        method="SLSQP",
+        bounds=bounds,
+        constraints=constraints,
         options={"maxiter": 5000, "ftol": 1e-10},
     )
 
@@ -115,11 +122,14 @@ def risk_parity_optimize(
 
     constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
     bounds = [(0.01, 1.0) for _ in range(n)]
-    x0 = np.array([1/n] * n)
+    x0 = np.array([1 / n] * n)
 
     result = minimize(
-        risk_concentration, x0, method="SLSQP",
-        bounds=bounds, constraints=constraints,
+        risk_concentration,
+        x0,
+        method="SLSQP",
+        bounds=bounds,
+        constraints=constraints,
         options={"maxiter": 5000},
     )
 
@@ -130,7 +140,9 @@ def risk_parity_optimize(
     return weights, ret, vol, sharpe
 
 
-def min_variance_optimize(cov_matrix: np.ndarray) -> tuple[np.ndarray, float, float, float]:
+def min_variance_optimize(
+    cov_matrix: np.ndarray,
+) -> tuple[np.ndarray, float, float, float]:
     """最小方差优化 — 追求最稳的组合。"""
     n = len(cov_matrix)
 
@@ -139,10 +151,11 @@ def min_variance_optimize(cov_matrix: np.ndarray) -> tuple[np.ndarray, float, fl
 
     constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1}]
     bounds = [(0.05, 0.50) for _ in range(n)]
-    x0 = np.array([1/n] * n)
+    x0 = np.array([1 / n] * n)
 
-    result = minimize(port_vol, x0, method="SLSQP",
-                      bounds=bounds, constraints=constraints)
+    result = minimize(
+        port_vol, x0, method="SLSQP", bounds=bounds, constraints=constraints
+    )
 
     weights = result.x / result.x.sum() if result.success else x0
     mean_returns = np.zeros(n)
@@ -151,13 +164,16 @@ def min_variance_optimize(cov_matrix: np.ndarray) -> tuple[np.ndarray, float, fl
 
 
 def efficient_frontier(
-    mean_returns: np.ndarray, cov_matrix: np.ndarray,
+    mean_returns: np.ndarray,
+    cov_matrix: np.ndarray,
     points: int = 50,
 ) -> pd.DataFrame:
     """计算有效前沿上的样本点。"""
     n = len(mean_returns)
     target_returns = np.linspace(
-        mean_returns.min() * 0.5, mean_returns.max() * 1.2, points,
+        mean_returns.min() * 0.5,
+        mean_returns.max() * 1.2,
+        points,
     )
 
     frontier = []
@@ -167,20 +183,23 @@ def efficient_frontier(
             {"type": "eq", "fun": lambda w: np.dot(w, mean_returns) - target},
         ]
         bounds = [(0.0, 1.0) for _ in range(n)]
-        x0 = np.array([1/n] * n)
+        x0 = np.array([1 / n] * n)
 
         def port_vol_fn(w):
             return np.sqrt(np.dot(w, np.dot(cov_matrix, w)))
 
-        result = minimize(port_vol_fn, x0, method="SLSQP",
-                          bounds=bounds, constraints=constraints)
+        result = minimize(
+            port_vol_fn, x0, method="SLSQP", bounds=bounds, constraints=constraints
+        )
         if result.success:
             vol = np.sqrt(np.dot(result.x, np.dot(cov_matrix, result.x)))
-            frontier.append({
-                "return": round(target * 100, 2),
-                "volatility": round(vol * 100, 2),
-                "sharpe": round((target - 0.02) / vol, 2) if vol > 0 else 0,
-            })
+            frontier.append(
+                {
+                    "return": round(target * 100, 2),
+                    "volatility": round(vol * 100, 2),
+                    "sharpe": round((target - 0.02) / vol, 2) if vol > 0 else 0,
+                }
+            )
 
     return pd.DataFrame(frontier)
 
@@ -193,17 +212,26 @@ def optimize_portfolio(fund_codes: list[str]) -> dict:
 
     w, ret, vol, sharpe = max_sharpe_optimize(mean_returns, cov_matrix)
     results["最大夏普"] = {
-        "weights": w, "return": ret, "volatility": vol, "sharpe": sharpe,
+        "weights": w,
+        "return": ret,
+        "volatility": vol,
+        "sharpe": sharpe,
     }
 
     w, ret, vol, sharpe = min_variance_optimize(cov_matrix)
     results["最小方差"] = {
-        "weights": w, "return": ret, "volatility": vol, "sharpe": sharpe,
+        "weights": w,
+        "return": ret,
+        "volatility": vol,
+        "sharpe": sharpe,
     }
 
     w, ret, vol, sharpe = risk_parity_optimize(cov_matrix)
     results["风险平价"] = {
-        "weights": w, "return": ret, "volatility": vol, "sharpe": sharpe,
+        "weights": w,
+        "return": ret,
+        "volatility": vol,
+        "sharpe": sharpe,
     }
 
     returns_df_nonzero = mean_returns.copy()
@@ -219,27 +247,8 @@ def optimize_portfolio(fund_codes: list[str]) -> dict:
     }
 
 
-def main():
-    parser = argparse.ArgumentParser(description="投资组合优化器")
-    parser.add_argument(
-        "--codes", type=str, default="110020,001632,050027",
-        help="基金代码，逗号分隔",
-    )
-    args = parser.parse_args()
-
-    fund_codes = [c.strip() for c in args.codes.split(",")]
-
-    print(f"\n{'='*70}")
-    print(f"  投资组合优化")
-    print(f"{'='*70}")
-    print(f"  基金: {', '.join(fund_codes)}\n")
-
-    try:
-        result = optimize_portfolio(fund_codes)
-    except ValueError as e:
-        print(f"  [ERR] {e}")
-        return
-
+def _print_optimization_result(result: dict, fund_codes: list[str]) -> None:
+    """打印组合优化结果（从 main() 提取）。"""
     desc_map = {
         "最大夏普": "收益风险比最佳",
         "最小方差": "最稳组合",
@@ -248,21 +257,49 @@ def main():
 
     for strategy, data in result["results"].items():
         print(f"  [CHART] {strategy} ({desc_map.get(strategy, '')}):")
-        print(f"    收益: {data['return']*100:.1f}%  |  "
-              f"波动: {data['volatility']*100:.1f}%  |  "
-              f"夏普: {data['sharpe']:.2f}")
-        print(f"    权重: ", end="")
+        print(
+            f"    收益: {data['return'] * 100:.1f}%  |  "
+            f"波动: {data['volatility'] * 100:.1f}%  |  "
+            f"夏普: {data['sharpe']:.2f}"
+        )
+        print("    权重: ", end="")
         weights_str = ", ".join(
-            f"{c}: {w*100:.0f}%" for c, w in zip(fund_codes, data["weights"])
+            f"{c}: {w * 100:.0f}%" for c, w in zip(fund_codes, data["weights"])
         )
         print(weights_str)
         print()
 
-    print(f"  [TIP] 建议:")
-    print(f"  1. 新手推荐「风险平价」或「最小方差」，先求稳再求赚")
-    print(f"  2. 每季度或半年再平衡一次，恢复目标权重")
-    print(f"  3. 优化结果基于历史数据，未来可能偏离")
-    print(f"  4. 加入债券基金可大幅降低组合波动")
+    print("  [TIP] 建议:")
+    print("  1. 新手推荐「风险平价」或「最小方差」，先求稳再求赚")
+    print("  2. 每季度或半年再平衡一次，恢复目标权重")
+    print("  3. 优化结果基于历史数据，未来可能偏离")
+    print("  4. 加入债券基金可大幅降低组合波动")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="投资组合优化器")
+    parser.add_argument(
+        "--codes",
+        type=str,
+        default="110020,001632,050027",
+        help="基金代码，逗号分隔",
+    )
+    args = parser.parse_args()
+
+    fund_codes = [c.strip() for c in args.codes.split(",")]
+
+    print(f"\n{'=' * 70}")
+    print("  投资组合优化")
+    print(f"{'=' * 70}")
+    print(f"  基金: {', '.join(fund_codes)}\n")
+
+    try:
+        result = optimize_portfolio(fund_codes)
+    except ValueError as e:
+        print(f"  [ERR] {e}")
+        return
+
+    _print_optimization_result(result, fund_codes)
 
 
 if __name__ == "__main__":

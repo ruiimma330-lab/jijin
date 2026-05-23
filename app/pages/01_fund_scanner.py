@@ -20,8 +20,12 @@ def render():
         "基金类型",
         ["all", "stock", "bond", "mix", "index", "qdii"],
         format_func=lambda x: {
-            "all": "全部", "stock": "股票型", "bond": "债券型",
-            "mix": "混合型", "index": "指数型", "qdii": "QDII",
+            "all": "全部",
+            "stock": "股票型",
+            "bond": "债券型",
+            "mix": "混合型",
+            "index": "指数型",
+            "qdii": "QDII",
         }.get(x, x),
         index=2,
     )
@@ -74,50 +78,75 @@ def render():
         col.metric(label, value)
 
     # 数据表格
-    display_cols = [c for c in [
-        "code", "name", "annual_return", "annual_volatility",
-        "max_drawdown", "sharpe_ratio", "win_rate", "win_loss_ratio",
-    ] if c in result.columns]
+    display_cols = [
+        c
+        for c in [
+            "code",
+            "name",
+            "annual_return",
+            "annual_volatility",
+            "max_drawdown",
+            "sharpe_ratio",
+            "win_rate",
+            "win_loss_ratio",
+        ]
+        if c in result.columns
+    ]
     st.dataframe(
-        result[display_cols].style.format({
-            "annual_return": "{:.1f}%",
-            "annual_volatility": "{:.1f}%",
-            "max_drawdown": "{:.1f}%",
-            "sharpe_ratio": "{:.2f}",
-            "win_rate": "{:.0f}%",
-            "win_loss_ratio": "{:.2f}",
-        }),
-        use_container_width=True, hide_index=True,
+        result[display_cols].style.format(
+            {
+                "annual_return": "{:.1f}%",
+                "annual_volatility": "{:.1f}%",
+                "max_drawdown": "{:.1f}%",
+                "sharpe_ratio": "{:.2f}",
+                "win_rate": "{:.0f}%",
+                "win_loss_ratio": "{:.2f}",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
     )
 
     # 风险-收益散点图
     if "annual_return" in result.columns and "annual_volatility" in result.columns:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=result["annual_volatility"],
-            y=result["annual_return"],
-            mode="markers+text",
-            text=result["name"].str[:6],
-            textposition="top center",
-            marker=dict(
-                size=12,
-                color=result["sharpe_ratio"] if "sharpe_ratio" in result.columns else None,
-                colorscale="RdYlGn",
-                showscale=True,
-                colorbar=dict(title="夏普"),
-            ),
-            hovertemplate="%{text}<br>收益: %{y:.1f}%<br>波动: %{x:.1f}%<extra></extra>",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=result["annual_volatility"],
+                y=result["annual_return"],
+                mode="markers+text",
+                text=result["name"].str[:6],
+                textposition="top center",
+                marker=dict(
+                    size=12,
+                    color=result["sharpe_ratio"]
+                    if "sharpe_ratio" in result.columns
+                    else None,
+                    colorscale="RdYlGn",
+                    showscale=True,
+                    colorbar=dict(title="夏普"),
+                ),
+                hovertemplate="%{text}<br>收益: %{y:.1f}%<br>波动: %{x:.1f}%<extra></extra>",
+            )
+        )
         fig.update_layout(
             title="风险-收益散点图",
             xaxis_title="年化波动率 (%)",
             yaxis_title="年化收益率 (%)",
             height=500,
         )
-        fig.add_hline(y=min_return, line_dash="dash", line_color="gray",
-                       annotation_text=f"最低收益线 ({min_return}%)")
-        fig.add_vline(x=max_drawdown, line_dash="dash", line_color="red",
-                       annotation_text=f"最大回撤线 ({max_drawdown}%)")
+        fig.add_hline(
+            y=min_return,
+            line_dash="dash",
+            line_color="gray",
+            annotation_text=f"最低收益线 ({min_return}%)",
+        )
+        fig.add_vline(
+            x=max_drawdown,
+            line_dash="dash",
+            line_color="red",
+            annotation_text=f"最大回撤线 ({max_drawdown}%)",
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     # AI 解读入口
@@ -127,15 +156,19 @@ def render():
         if st.button("🔮 让 AI 帮我解读", key="ai_scanner"):
             try:
                 from app.utils.ai_advisor import get_advisor
+
                 advisor = get_advisor()
                 params = st.session_state.get("scanner_params", {})
-                interpretation = advisor.interpret("scanner", {
-                    "result_df": result,
-                    "fund_type": params.get("fund_type", "all"),
-                    "min_return": params.get("min_return", 0),
-                    "max_drawdown": params.get("max_drawdown", 100),
-                    "min_sharpe": params.get("min_sharpe", 0),
-                })
+                interpretation = advisor.interpret(
+                    "scanner",
+                    {
+                        "result_df": result,
+                        "fund_type": params.get("fund_type", "all"),
+                        "min_return": params.get("min_return", 0),
+                        "max_drawdown": params.get("max_drawdown", 100),
+                        "min_sharpe": params.get("min_sharpe", 0),
+                    },
+                )
                 st.markdown(interpretation)
             except ImportError:
                 st.info("AI 顾问模块尚未初始化，请先完成 Phase 3。")

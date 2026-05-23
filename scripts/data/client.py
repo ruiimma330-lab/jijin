@@ -23,6 +23,7 @@ class DataSourceError(Exception):
 @dataclass(frozen=True)
 class FundInfo:
     """基金基本信息（不可变）。"""
+
     code: str
     name: str
     fund_type: str
@@ -35,9 +36,7 @@ class FundInfo:
 
 def _ensure_ak():
     if ak is None:
-        raise DataSourceError(
-            "akshare 未安装。请运行: pip install akshare"
-        )
+        raise DataSourceError("akshare 未安装。请运行: pip install akshare")
 
 
 def get_fund_list(fund_type: str = "all") -> pd.DataFrame:
@@ -52,16 +51,20 @@ def get_fund_list(fund_type: str = "all") -> pd.DataFrame:
     """
     _ensure_ak()
     df = ak.fund_rating_all()
-    df = df.rename(columns={
-        "代码": "code",
-        "简称": "name",
-        "基金经理": "manager",
-        "基金公司": "company",
-        "类型": "fund_type",
-    })
-    available_cols = [c for c in [
-        "code", "name", "fund_type", "company", "manager"
-    ] if c in df.columns]
+    df = df.rename(
+        columns={
+            "代码": "code",
+            "简称": "name",
+            "基金经理": "manager",
+            "基金公司": "company",
+            "类型": "fund_type",
+        }
+    )
+    available_cols = [
+        c
+        for c in ["code", "name", "fund_type", "company", "manager"]
+        if c in df.columns
+    ]
     result = df[available_cols].copy()
     if fund_type != "all":
         type_map = {
@@ -99,15 +102,17 @@ def get_fund_nav(
         start = date.today() - timedelta(days=365)
         start_date = start.strftime("%Y%m%d")
 
-    df = ak.fund_open_fund_info_em(
-        symbol=fund_code, indicator="单位净值走势"
-    )
+    df = ak.fund_open_fund_info_em(symbol=fund_code, indicator="单位净值走势")
     if df is None or df.empty:
         raise DataSourceError(f"未找到基金 {fund_code} 的净值数据")
 
-    df = df.rename(columns={
-        "净值日期": "date", "单位净值": "nav", "日增长率": "daily_growth_pct",
-    })
+    df = df.rename(
+        columns={
+            "净值日期": "date",
+            "单位净值": "nav",
+            "日增长率": "daily_growth_pct",
+        }
+    )
     df["date"] = pd.to_datetime(df["date"])
     df["nav"] = pd.to_numeric(df["nav"], errors="coerce")
     df = df.dropna(subset=["nav"])
@@ -115,9 +120,7 @@ def get_fund_nav(
 
     # 获取累计净值
     try:
-        df_acc = ak.fund_open_fund_info_em(
-            symbol=fund_code, indicator="累计净值走势"
-        )
+        df_acc = ak.fund_open_fund_info_em(symbol=fund_code, indicator="累计净值走势")
         df_acc = df_acc.rename(columns={"净值日期": "date", "累计净值": "accum_nav"})
         df_acc["date"] = pd.to_datetime(df_acc["date"])
         df_acc["accum_nav"] = pd.to_numeric(df_acc["accum_nav"], errors="coerce")
@@ -148,9 +151,14 @@ def get_fund_ranking(
     """
     _ensure_ak()
     type_map = {
-        "all": "全部", "stock": "股票型", "bond": "债券型",
-        "mix": "混合型", "index": "指数型", "money": "货币型",
-        "qdii": "QDII", "fof": "FOF",
+        "all": "全部",
+        "stock": "股票型",
+        "bond": "债券型",
+        "mix": "混合型",
+        "index": "指数型",
+        "money": "货币型",
+        "qdii": "QDII",
+        "fof": "FOF",
     }
     symbol = type_map.get(fund_type, fund_type)
     df = ak.fund_open_fund_rank_em(symbol=symbol)
@@ -167,7 +175,9 @@ def get_fund_ranking(
     }
     available = {k: v for k, v in rename_map.items() if k in df.columns}
     df = df.rename(columns=available)
-    return_cols = [c for c in available.values() if c in df.columns and c not in ("code", "name")]
+    return_cols = [
+        c for c in available.values() if c in df.columns and c not in ("code", "name")
+    ]
     result = df[["code", "name"] + return_cols].head(top_n)
     return result.reset_index(drop=True)
 

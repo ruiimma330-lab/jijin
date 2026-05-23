@@ -115,6 +115,7 @@ class AIAdvisor:
     def client(self):
         if self._client is None and self.api_key:
             from openai import OpenAI
+
             self._client = OpenAI(api_key=self.api_key, base_url=self.base_url)
         return self._client
 
@@ -163,10 +164,10 @@ class AIAdvisor:
             result_str = str(result)
         return f"""用户刚刚运行了基金筛选器，以下是筛选结果：
 
-筛选条件：基金类型={data.get('fund_type', '?')},
-最低年化收益={data.get('min_return', 0)}%,
-最大回撤容忍度={data.get('max_drawdown', 100)}%,
-最低夏普比率={data.get('min_sharpe', 0)}
+筛选条件：基金类型={data.get("fund_type", "?")},
+最低年化收益={data.get("min_return", 0)}%,
+最大回撤容忍度={data.get("max_drawdown", 100)}%,
+最低夏普比率={data.get("min_sharpe", 0)}
 
 字段含义：
 - annual_return: 年化收益率(%)，相当于存银行一年的"利率"
@@ -189,11 +190,11 @@ class AIAdvisor:
     def _build_signals_context(data: dict) -> str:
         return f"""用户刚刚获取了市场择时信号，以下是结果：
 
-综合信号：{data.get('overall_signal', '?')}
-建议：{data.get('suggestion', '?')}
+综合信号：{data.get("overall_signal", "?")}
+建议：{data.get("suggestion", "?")}
 
 各分项信号：
-{json.dumps(data.get('signals', {}), ensure_ascii=False, indent=2, default=str)}
+{json.dumps(data.get("signals", {}), ensure_ascii=False, indent=2, default=str)}
 
 请用大白话解释：
 1. 这个综合信号是什么意思
@@ -205,10 +206,10 @@ class AIAdvisor:
     def _build_portfolio_context(data: dict) -> str:
         return f"""用户刚刚运行了投资组合优化，以下是三种策略的结果：
 
-分析基金：{data.get('fund_codes', [])}
+分析基金：{data.get("fund_codes", [])}
 
 优化结果：
-{json.dumps(data.get('results', {}), ensure_ascii=False, indent=2)}
+{json.dumps(data.get("results", {}), ensure_ascii=False, indent=2)}
 
 三种策略说明：
 - 最大夏普：追求收益风险比最大化
@@ -225,17 +226,17 @@ class AIAdvisor:
     def _build_performance_context(data: dict) -> str:
         return f"""用户刚刚获取了基金业绩归因分析，以下是结果：
 
-基金：{data.get('fund_code', '?')}，基准：{data.get('benchmark', '?')}
-Alpha(年化): {data.get('alpha_annual', '?')}%
-Beta: {data.get('beta', '?')}
-R²: {data.get('r_squared', '?')}
-基金年化收益: {data.get('fund_return', '?')}%
-基准年化收益: {data.get('bench_return', '?')}%
-信息比率: {data.get('information_ratio', '?')}
-跟踪误差: {data.get('tracking_error', '?')}%
+基金：{data.get("fund_code", "?")}，基准：{data.get("benchmark", "?")}
+Alpha(年化): {data.get("alpha_annual", "?")}%
+Beta: {data.get("beta", "?")}
+R²: {data.get("r_squared", "?")}
+基金年化收益: {data.get("fund_return", "?")}%
+基准年化收益: {data.get("bench_return", "?")}%
+信息比率: {data.get("information_ratio", "?")}
+跟踪误差: {data.get("tracking_error", "?")}%
 
 牛熊表现：
-{json.dumps(data.get('bull_bear', {}), ensure_ascii=False, indent=2, default=str)}
+{json.dumps(data.get("bull_bear", {}), ensure_ascii=False, indent=2, default=str)}
 
 请用大白话解释：
 1. Alpha 和 Beta 用开车打比方解释
@@ -247,15 +248,15 @@ R²: {data.get('r_squared', '?')}
     def _build_risk_context(data: dict) -> str:
         return f"""用户刚刚获取了基金风险评估报告，以下是结果：
 
-年化波动率: {data.get('annual_volatility', '?')}%
-最大回撤: {data.get('max_drawdown', '?')}%
-回撤区间: {data.get('max_dd_start', '?')} ~ {data.get('max_dd_end', '?')}
-恢复天数: {data.get('recovery_days', '?')} 天
-VaR(95%): {data.get('VaR_95', '?')}%
-VaR(99%): {data.get('VaR_99', '?')}%
-CVaR(95%): {data.get('CVaR_95', '?')}%
-偏度: {data.get('skewness', '?')}
-峰度: {data.get('kurtosis', '?')}
+年化波动率: {data.get("annual_volatility", "?")}%
+最大回撤: {data.get("max_drawdown", "?")}%
+回撤区间: {data.get("max_dd_start", "?")} ~ {data.get("max_dd_end", "?")}
+恢复天数: {data.get("recovery_days", "?")} 天
+VaR(95%): {data.get("VaR_95", "?")}%
+VaR(99%): {data.get("VaR_99", "?")}%
+CVaR(95%): {data.get("CVaR_95", "?")}%
+偏度: {data.get("skewness", "?")}
+峰度: {data.get("kurtosis", "?")}
 
 请用大白话解释：
 1. 波动率和回撤用生活例子解释
@@ -265,10 +266,10 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
 
     @staticmethod
     def _build_backtest_context(data: dict) -> str:
-        return f"""用户刚刚运行了策略回测对比，基金代码 {data.get('fund_code', '?')}。
+        return f"""用户刚刚运行了策略回测对比，基金代码 {data.get("fund_code", "?")}。
 以下是不同策略的结果：
 
-{json.dumps(data.get('results', []), ensure_ascii=False, indent=2)}
+{json.dumps(data.get("results", []), ensure_ascii=False, indent=2)}
 
 请用大白话解释：
 1. 定投和一次性投资的核心区别（用买菜打比方）
@@ -285,7 +286,10 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
             "risk": self._build_risk_context,
             "backtest": self._build_backtest_context,
         }
-        builder = builders.get(analysis_type, lambda d: json.dumps(d, ensure_ascii=False, indent=2, default=str))
+        builder = builders.get(
+            analysis_type,
+            lambda d: json.dumps(d, ensure_ascii=False, indent=2, default=str),
+        )
         return builder(data)
 
     # ── 主调用 ─────────────────────────────────────────
@@ -304,7 +308,12 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT + "\n\n## 参考知识库\n下列知识库内容可能有助于你的解释，请优先引用其中的知识点：\n\n" + (knowledge or "(未找到相关知识)")},
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPT
+                        + "\n\n## 参考知识库\n下列知识库内容可能有助于你的解释，请优先引用其中的知识点：\n\n"
+                        + (knowledge or "(未找到相关知识)"),
+                    },
                     {"role": "user", "content": user_message},
                 ],
                 temperature=0.7,
@@ -334,7 +343,14 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
         relevant_docs = self._match_knowledge_by_query(question, kb)
         knowledge_text = "\n\n".join(relevant_docs[:2]) if relevant_docs else ""
 
-        messages = [{"role": "system", "content": SYSTEM_PROMPT + "\n\n## 参考知识库\n" + (knowledge_text or "通用投资知识")}]
+        messages = [
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT
+                + "\n\n## 参考知识库\n"
+                + (knowledge_text or "通用投资知识"),
+            }
+        ]
 
         # 最近 5 轮对话
         for msg in history[-10:]:
@@ -355,11 +371,20 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
     def _match_knowledge_by_query(self, query: str, kb: dict) -> list[str]:
         """根据用户问题关键词匹配知识库文档。"""
         keywords_map = {
-            "基金": ["01-基金基础/01-什么是基金.md", "01-基金基础/02-基金分类与风险等级.md"],
-            "定投": ["02-投资入门/02-定投为什么适合小白.md", "05-投资策略/01-定投策略详解.md"],
+            "基金": [
+                "01-基金基础/01-什么是基金.md",
+                "01-基金基础/02-基金分类与风险等级.md",
+            ],
+            "定投": [
+                "02-投资入门/02-定投为什么适合小白.md",
+                "05-投资策略/01-定投策略详解.md",
+            ],
             "复利": ["02-投资入门/01-复利与时间价值.md"],
             "回撤": ["06-风险管理/01-认识风险.md", "04-分析方法/01-看懂基金指标.md"],
-            "风险": ["06-风险管理/01-认识风险.md", "06-风险管理/02-仓位管理与止损策略.md"],
+            "风险": [
+                "06-风险管理/01-认识风险.md",
+                "06-风险管理/02-仓位管理与止损策略.md",
+            ],
             "夏普": ["04-分析方法/01-看懂基金指标.md"],
             "波动": ["04-分析方法/01-看懂基金指标.md"],
             "估值": ["04-分析方法/01-看懂基金指标.md"],
@@ -393,7 +418,10 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
         """检查 AI 回复是否包含禁止内容。如检测到，追加风险提示。"""
         for pattern, category in FORBIDDEN_PATTERNS:
             if re.search(pattern, text):
-                return text + f"\n\n---\n⚠️ 以上回复中可能包含不适当的{category}。请注意：本工具不构成任何投资建议，所有分析仅供参考学习。投资有风险，入市需谨慎。"
+                return (
+                    text
+                    + f"\n\n---\n⚠️ 以上回复中可能包含不适当的{category}。请注意：本工具不构成任何投资建议，所有分析仅供参考学习。投资有风险，入市需谨慎。"
+                )
         return text
 
     # ── 规则回退 ───────────────────────────────────────
@@ -402,11 +430,19 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
         """无 API 时的模板化解读。"""
         if analysis_type == "scanner":
             result = data.get("result_df")
-            if result is None or (hasattr(result, 'empty') and result.empty):
+            if result is None or (hasattr(result, "empty") and result.empty):
                 return "没有筛选结果，试试放宽条件。"
-            n = len(result) if hasattr(result, '__len__') else 0
-            avg_ret = result["annual_return"].mean() if "annual_return" in result.columns else 0
-            avg_dd = abs(result["max_drawdown"].mean()) if "max_drawdown" in result.columns else 0
+            n = len(result) if hasattr(result, "__len__") else 0
+            avg_ret = (
+                result["annual_return"].mean()
+                if "annual_return" in result.columns
+                else 0
+            )
+            avg_dd = (
+                abs(result["max_drawdown"].mean())
+                if "max_drawdown" in result.columns
+                else 0
+            )
             return (
                 f"**筛选结果概览**\n\n"
                 f"共筛选出 {n} 只符合条件的基金。\n\n"
@@ -414,8 +450,8 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
                 f"- 年化收益率：平均 {avg_ret:.1f}%，相当于你放银行一年能拿到的利息。"
                 f"比如年化 10% 就是投 1 万一年赚 1000 元。\n"
                 f"- 最大回撤：平均 {avg_dd:.1f}%，意思是历史上从最高点最多跌了这么多。"
-                f"打个比方，你花 100 元买的基金，最惨的时候变成了 {100-avg_dd:.0f} 元。\n"
-                f"- 夏普比率：衡量\"性价比\"，越高说明冒同样的风险赚得越多。"
+                f"打个比方，你花 100 元买的基金，最惨的时候变成了 {100 - avg_dd:.0f} 元。\n"
+                f'- 夏普比率：衡量"性价比"，越高说明冒同样的风险赚得越多。'
                 f"好比两个人都花了 1 小时做饭，夏普高的人做出来的更好吃。\n\n"
                 f"⚠️ 提醒：历史业绩好不代表未来也好。选基金不仅要看收益，更要看自己能不能承受回撤。"
             )
@@ -431,10 +467,10 @@ CVaR(95%): {data.get('CVaR_95', '?')}%
                 f"- 波动率 {vol}%（{level}）：这只基金净值上蹿下跳的程度。"
                 f"好比开车，{level}波动就像{'平稳的高速路' if level == '低' else '颠簸的山路' if level == '中等' else '过山车'}。\n"
                 f"- 最大回撤 {dd}%：历史上最惨的时候跌了多少。"
-                f"比如投 1 万元，最多时账面亏了 {dd*100:.0f} 元。\n"
+                f"比如投 1 万元，最多时账面亏了 {dd * 100:.0f} 元。\n"
                 f"- 恢复需要 {recovery} 天：跌下去后花了这么久才爬回来。\n"
                 f"- VaR(95%) {var95}%：95% 的把握单日亏损不超过这个幅度。\n\n"
-                f"⚠️ 选基金前先问自己：能接受亏 {dd*100:.0f} 元吗？能等 {recovery} 天吗？"
+                f"⚠️ 选基金前先问自己：能接受亏 {dd * 100:.0f} 元吗？能等 {recovery} 天吗？"
             )
 
         if analysis_type == "backtest":

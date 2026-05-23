@@ -1,0 +1,370 @@
+{
+  "projectId": "9ea5d7c0ba91ae94a394a50a48db398c685c44db46b1a3f68d542a34d75ca7f6",
+  "version": 1,
+  "members": [
+    {
+      "id": "01J00000000000000000000000",
+      "name": "群主",
+      "role": "",
+      "roleKey": "members.roles.owner",
+      "roleType": "owner",
+      "avatar": "css:anime-10014",
+      "status": "online",
+      "autoStartTerminal": false
+    },
+    {
+      "id": "01KS9V5Y912X7BT8W3C4D8HR39",
+      "name": "项目经理",
+      "role": "",
+      "roleKey": "members.roles.supervisor",
+      "roleType": "supervisor",
+      "avatar": "/avatar-presets/supervisor/supervisor-default.gif",
+      "status": "online",
+      "autoStartTerminal": true,
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false,
+      "skillPaths": [
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\backend-api-engineering",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\docx",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\frontend-ui-engineering",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\image-crop",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\just-shut-your-mouth",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\project-development-quality-maintainability",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\project-development-quality-maintainability-1",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\qa-test-engineering",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\software-company-coo-operations",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\software-ux-design",
+        "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\universal-agent-problem-solving"
+      ],
+      "terminalType": "claude",
+      "terminalCommand": "claude",
+      "soloDocumentPath": ".golutra/members/01KS9V5Y912X7BT8W3C4D8HR39/solo.md"
+    },
+    {
+      "id": "01KS9VQA4VKC5P7305FVJTQ3G4",
+      "name": "技术主管",
+      "role": "",
+      "roleKey": "members.roles.aiAssistant",
+      "roleType": "assistant",
+      "avatar": "css:realistic-4",
+      "status": "online",
+      "autoStartTerminal": true,
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false,
+      "skillPaths": [
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/project-development-quality-maintainability",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/software-company-coo-operations",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/universal-agent-problem-solving"
+      ],
+      "terminalType": "claude",
+      "terminalCommand": "claude",
+      "soloDocumentPath": ".golutra/members/01KS9VQA4VKC5P7305FVJTQ3G4/solo.md"
+    },
+    {
+      "id": "01KS9VQCX78SXDRG5HCSTS9XXX",
+      "name": "后端工程师",
+      "role": "",
+      "roleKey": "members.roles.member",
+      "roleType": "member",
+      "avatar": "css:realistic-10",
+      "status": "online",
+      "autoStartTerminal": true,
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false,
+      "skillPaths": [
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/backend-api-engineering",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/qa-test-engineering",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/universal-agent-problem-solving"
+      ],
+      "terminalType": "claude",
+      "terminalCommand": "claude",
+      "soloDocumentPath": ".golutra/members/01KS9VQCX78SXDRG5HCSTS9XXX/solo.md"
+    },
+    {
+      "id": "01KS9VQFAH4MFR4JYV68VWC9B7",
+      "name": "前端工程师",
+      "role": "",
+      "roleKey": "members.roles.member",
+      "roleType": "member",
+      "avatar": "css:realistic-3",
+      "status": "online",
+      "autoStartTerminal": true,
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false,
+      "skillPaths": [
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/frontend-ui-engineering",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/software-ux-design"
+      ],
+      "terminalType": "claude",
+      "terminalCommand": "claude",
+      "soloDocumentPath": ".golutra/members/01KS9VQFAH4MFR4JYV68VWC9B7/solo.md"
+    },
+    {
+      "id": "01KS9VZ42RCMDSH8NCF8KJ5CZR",
+      "name": "质量监工",
+      "role": "",
+      "roleKey": "members.roles.supervisor",
+      "roleType": "supervisor",
+      "avatar": "/avatar-presets/supervisor/supervisor-default.gif",
+      "status": "online",
+      "autoStartTerminal": true,
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false,
+      "skillPaths": [
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/project-development-quality-maintainability-1",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/qa-test-engineering",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/universal-agent-problem-solving",
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/just-shut-your-mouth"
+      ],
+      "terminalType": "claude",
+      "terminalCommand": "claude",
+      "soloDocumentPath": ".golutra/members/01KS9VZ42RCMDSH8NCF8KJ5CZR/solo.md"
+    },
+    {
+      "id": "01KS9VZ67RZS6BYEXHS9NBV8CA",
+      "name": "投资研究员",
+      "role": "",
+      "roleKey": "members.roles.member",
+      "roleType": "member",
+      "avatar": "css:realistic-4",
+      "status": "online",
+      "autoStartTerminal": true,
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false,
+      "skillPaths": [
+        "C:/Users/Administrator/AppData/Roaming/com.golutra/skills/universal-agent-problem-solving"
+      ],
+      "terminalType": "claude",
+      "terminalCommand": "claude",
+      "soloDocumentPath": ".golutra/members/01KS9VZ67RZS6BYEXHS9NBV8CA/solo.md"
+    }
+  ],
+  "memberSequence": {},
+  "terminal": {
+    "recentClosedTabs": [
+      {
+        "memberId": "01KS9V5Y912X7BT8W3C4D8HR39",
+        "closedAt": 1779524117664
+      }
+    ]
+  },
+  "inviteSkillSelections": {
+    "assistant": [],
+    "supervisor": [
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\backend-api-engineering",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\docx",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\frontend-ui-engineering",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\image-crop",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\just-shut-your-mouth",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\project-development-quality-maintainability",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\qa-test-engineering",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\project-development-quality-maintainability-1",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\software-company-coo-operations",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\software-ux-design",
+      "C:\\Users\\Administrator\\AppData\\Roaming\\com.golutra\\skills\\universal-agent-problem-solving"
+    ],
+    "member": []
+  },
+  "invitePreferences": {
+    "supervisor": {
+      "unlimitedAccess": true,
+      "collaborationMode": true,
+      "sandboxed": false
+    }
+  },
+  "inviteOnboardingPromptTemplates": {},
+  "dispatchMessagePrefixRules": {
+    "assistant": [
+      {
+        "id": "dispatch-prefix-default-assistant-collaboration-supervisor",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "supervisor"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "完成supervisor的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向supervisor汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "完成supervisor的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向supervisor汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Complete the supervisor's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and direct all idle members in the working channel to continue. If the task is finished, you may only report to the supervisor. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-assistant-collaboration-owner",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "owner"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "完成owner的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "完成owner的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Complete the owner's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and direct all idle members in the working channel to continue. If the task is finished, you may only report to the owner. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-assistant-collaboration-admin",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "admin"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "完成admin的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向admin汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "完成admin的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向admin汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Complete the admin's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and direct all idle members in the working channel to continue. If the task is finished, you may only report to the admin. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-assistant-collaboration-assistant",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "assistant"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "完成assistant的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向assistant汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "完成assistant的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥工作频道全部空闲的member继续完成；若已完成，仅允许向assistant汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Complete the assistant's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and direct all idle members in the working channel to continue. If the task is finished, you may only report to the assistant. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-assistant-collaboration-member",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "member"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "先审核当前任务完成情况；若未完成，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥当前汇报的member继续完成；若已完成，仅允许向supervisor或者owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "先审核当前任务完成情况；若未完成，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指挥当前汇报的member继续完成；若已完成，仅允许向supervisor或者owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Review the current task status first. If it is unfinished, use [[cmd key=\"use_roadmap_skill\"]] to inspect unfinished tasks and direct all idle members in the working channel to continue. If it is finished, you may only report to the supervisor or owner. [[cmd key=\"use_chat_skill\"]]."
+        }
+      }
+    ],
+    "supervisor": [
+      {
+        "id": "dispatch-prefix-default-supervisor-collaboration-owner",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "owner"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "完成owner的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，优先指挥全部空闲的assistant完成任务，若当前频道没有assistant，指挥全部空闲的member完成任务；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "完成owner的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，优先指挥全部空闲的assistant完成任务，若当前频道没有assistant，指挥全部空闲的member完成任务；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Complete the owner's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and prioritize directing all idle assistants to continue. If there is no assistant in the current channel, direct all idle members instead. If the task is finished, you may only report to the owner. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-supervisor-collaboration-admin",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "admin"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "完成admin的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，优先指挥全部空闲的assistant完成任务，若当前频道没有assistant，指挥全部空闲的member完成任务；若已完成，仅允许向admin汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "完成admin的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，优先指挥全部空闲的assistant完成任务，若当前频道没有assistant，指挥全部空闲的member完成任务；若已完成，仅允许向admin汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Complete the admin's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and prioritize directing all idle assistants to continue. If there is no assistant in the current channel, direct all idle members instead. If the task is finished, you may only report to the admin. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-supervisor-collaboration-supervisor",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "supervisor"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "协调supervisor的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，优先指挥全部空闲的assistant完成任务，若当前频道没有assistant，指挥全部空闲的member完成任务；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "协调supervisor的要求，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，优先指挥全部空闲的assistant完成任务，若当前频道没有assistant，指挥全部空闲的member完成任务；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Coordinate the supervisor's request. [[cmd key=\"use_roadmap_skill\"]] Inspect unfinished tasks and prioritize directing all idle assistants to continue. If there is no assistant in the current channel, direct all idle members instead. If the task is finished, you may only report to the owner. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-supervisor-collaboration-assistant",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "assistant"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "先审核当前任务完成情况；若未完成，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指导assistant继续完成；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "先审核当前任务完成情况；若未完成，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指导assistant继续完成；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Review the current task status first. If it is unfinished, use [[cmd key=\"use_roadmap_skill\"]] to inspect unfinished tasks and guide the assistant to continue. If the task is finished, you may only report to the owner. [[cmd key=\"use_chat_skill\"]]."
+        }
+      },
+      {
+        "id": "dispatch-prefix-default-supervisor-collaboration-member",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "member"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "先审核当前任务完成情况；若未完成，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指导空闲的member继续完成；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "先审核当前任务完成情况；若未完成，[[cmd key=\"use_roadmap_skill\"]] 查看未完成任务，指导空闲的member继续完成；若已完成，仅允许向owner汇报。[[cmd key=\"use_chat_skill\"]]。",
+          "en": "Review the current task status first. If it is unfinished, use [[cmd key=\"use_roadmap_skill\"]] to inspect unfinished tasks and guide an idle member to continue. If the task is finished, you may only report to the owner. [[cmd key=\"use_chat_skill\"]]."
+        }
+      }
+    ],
+    "member": [
+      {
+        "id": "dispatch-prefix-default-member-collaboration-all",
+        "collaborationMode": "collaboration",
+        "senderRoles": [
+          "owner",
+          "admin",
+          "assistant",
+          "supervisor",
+          "member"
+        ],
+        "senderMemberIds": [],
+        "senderAgentTemplateFolderNames": [],
+        "skillPaths": [],
+        "channelIds": [],
+        "prefix": "[[cmd key=\"use_chat_skill\"]]。",
+        "prefixByLanguage": {
+          "zh": "[[cmd key=\"use_chat_skill\"]]。",
+          "en": "[[cmd key=\"use_chat_skill\"]]."
+        }
+      }
+    ]
+  }
+}

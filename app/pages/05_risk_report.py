@@ -6,7 +6,6 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import streamlit as st
-import plotly.graph_objects as go
 from scripts.analysis.risk import risk_report
 from scripts.data.client import get_fund_nav
 from scripts.utils.viz import plot_drawdown
@@ -16,8 +15,12 @@ def render():
     st.title("⚠️ 风险评估报告")
     st.markdown("了解一只基金的风险有多大，帮你判断自己能不能承受。")
 
-    fund_code = st.text_input("基金代码", value="110020", max_chars=6,
-                               placeholder="输入 6 位基金代码，如 110020")
+    fund_code = st.text_input(
+        "基金代码",
+        value="110020",
+        max_chars=6,
+        placeholder="输入 6 位基金代码，如 110020",
+    )
 
     if st.button("📊 生成报告", type="primary"):
         if not fund_code:
@@ -79,9 +82,9 @@ def render():
     st.markdown(f"""
     | 项目 | 数值 |
     |------|------|
-    | 最大回撤区间 | {report['max_dd_start']} ~ {report['max_dd_end']} |
-    | 恢复天数 | {report['recovery_days']} 天 |
-    | 平均回撤 | {report['avg_drawdown']}% |
+    | 最大回撤区间 | {report["max_dd_start"]} ~ {report["max_dd_end"]} |
+    | 恢复天数 | {report["recovery_days"]} 天 |
+    | 平均回撤 | {report["avg_drawdown"]}% |
     """)
 
     # 回撤图表
@@ -90,15 +93,15 @@ def render():
             fig = plot_drawdown(nav_df)
             st.pyplot(fig)
         except Exception:
-            pass
+            st.warning("回撤图表暂时无法渲染，请稍后重试。")
 
     # VaR 解释
     st.subheader("🎲 风险价值 (VaR) 解读")
     var_95_abs = abs(float(report["VaR_95"]))
     st.markdown(f"""
-    - **VaR(95%) = {report['VaR_95']}%** — 95% 的把握，单日亏损不超过 **{var_95_abs}%**
+    - **VaR(95%) = {report["VaR_95"]}%** — 95% 的把握，单日亏损不超过 **{var_95_abs}%**
     - 换句话说：每 100 个交易日中，约有 5 天亏损超过 {var_95_abs}%
-    - **CVaR(95%) = {report['CVaR_95']}%** — 如果真的遇到那 5% 的倒霉日子，平均会亏这么多
+    - **CVaR(95%) = {report["CVaR_95"]}%** — 如果真的遇到那 5% 的倒霉日子，平均会亏这么多
 
     💡 投资 {10000:,} 元，日常单日亏损大概率不超过 {var_95_abs * 100:.0f} 元。
     """)
@@ -109,6 +112,7 @@ def render():
         if st.button("🔮 让 AI 帮我解释这些风险数字", key="ai_risk"):
             try:
                 from app.utils.ai_advisor import get_advisor
+
                 advisor = get_advisor()
                 interpretation = advisor.interpret("risk", report)
                 st.markdown(interpretation)

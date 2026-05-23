@@ -53,8 +53,16 @@ NAME_PATTERNS = [
 
 # 持仓金额的模式 (元)
 AMOUNT_PATTERNS = [
-    ["持仓金额", "持有金额", "市值", "持仓市值", "当前市值",
-     "amount", "value", "市场价值"],
+    [
+        "持仓金额",
+        "持有金额",
+        "市值",
+        "持仓市值",
+        "当前市值",
+        "amount",
+        "value",
+        "市场价值",
+    ],
 ]
 
 # 持仓份额的模式
@@ -187,9 +195,9 @@ def parse_csv(file_content: bytes, filename: str = "") -> ParseResult:
         return ParseResult(
             success=False,
             error=(
-                '找不到「基金代码」列。\n\n'
+                "找不到「基金代码」列。\n\n"
                 f"文件列名: {', '.join(header)}\n\n"
-                '请确认文件包含至少一列类似「基金代码」或「代码」的列。'
+                "请确认文件包含至少一列类似「基金代码」或「代码」的列。"
             ),
         )
 
@@ -275,24 +283,28 @@ def parse_csv(file_content: bytes, filename: str = "") -> ParseResult:
             except IndexError:
                 pass
 
-        holdings.append(PortfolioHolding(
-            fund_code=code,
-            fund_name=name,
-            holding_amount=amount,
-            holding_shares=shares,
-            cost_basis=cost,
-            latest_nav=nav,
-            daily_return=daily_ret,
-            total_return=total_ret,
-            return_rate=ret_rate,
-            platform=platform,
-        ))
+        holdings.append(
+            PortfolioHolding(
+                fund_code=code,
+                fund_name=name,
+                holding_amount=amount,
+                holding_shares=shares,
+                cost_basis=cost,
+                latest_nav=nav,
+                daily_return=daily_ret,
+                total_return=total_ret,
+                return_rate=ret_rate,
+                platform=platform,
+            )
+        )
 
     if skipped > 0:
         warnings.append(f"跳过了 {skipped} 行无效数据")
 
     if not holdings:
-        return ParseResult(success=False, error="未能解析出任何持仓记录。请检查文件格式。")
+        return ParseResult(
+            success=False, error="未能解析出任何持仓记录。请检查文件格式。"
+        )
 
     return ParseResult(
         success=True,
@@ -306,15 +318,24 @@ def holdings_to_dataframe(holdings: list[PortfolioHolding]) -> pd.DataFrame:
     """将持仓列表转为 DataFrame。"""
     if not holdings:
         return pd.DataFrame()
-    return pd.DataFrame([{
-        "基金代码": h.fund_code,
-        "基金名称": h.fund_name,
-        "持仓金额(元)": h.holding_amount,
-        "持仓份额": h.holding_shares,
-        "成本净值": h.cost_basis,
-        "最新净值": h.latest_nav,
-        "昨日收益(元)": h.daily_return,
-        "累计收益(元)": h.total_return,
-        "持有收益率(%)": h.return_rate,
-        "数据来源": {"alipay": "支付宝", "wechat": "微信理财通", "tiantian": "天天基金"}.get(h.platform, h.platform),
-    } for h in holdings])
+    return pd.DataFrame(
+        [
+            {
+                "基金代码": h.fund_code,
+                "基金名称": h.fund_name,
+                "持仓金额(元)": h.holding_amount,
+                "持仓份额": h.holding_shares,
+                "成本净值": h.cost_basis,
+                "最新净值": h.latest_nav,
+                "昨日收益(元)": h.daily_return,
+                "累计收益(元)": h.total_return,
+                "持有收益率(%)": h.return_rate,
+                "数据来源": {
+                    "alipay": "支付宝",
+                    "wechat": "微信理财通",
+                    "tiantian": "天天基金",
+                }.get(h.platform, h.platform),
+            }
+            for h in holdings
+        ]
+    )

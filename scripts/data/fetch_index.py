@@ -31,6 +31,13 @@ INDEX_MAP = {
     "399673": {"name": "创业板50", "code": "399673"},
 }
 
+INDEX_NAME_MAP = {
+    "000016": "上证50",
+    "000300": "沪深300",
+    "000905": "中证500",
+    "399673": "创业板50",
+}
+
 PE_HISTORY = {
     "000300": {"min": 8.0, "max": 48.0, "median": 13.5},
     "000905": {"min": 15.0, "max": 92.0, "median": 31.0},
@@ -46,64 +53,82 @@ def _estimate_pe_percentile(current_pe: float, history: dict) -> float:
         return 0.0
     if current_pe >= history["max"]:
         return 100.0
-    percentile = (
-        (current_pe - history["min"])
-        / (history["max"] - history["min"])
-        * 100
-    )
+    percentile = (current_pe - history["min"]) / (history["max"] - history["min"]) * 100
     return round(percentile, 1)
 
 
 def _get_index_valuation() -> pd.DataFrame:
-    """获取主要指数的当前估值数据。"""
+    """获取主要指数的当前估值数据（PE、分位）。"""
     _ensure_ak()
-    try:
-        df = ak.index_value_hist_funddb()
-    except Exception:
+    rows = []
+    for index_code, name in INDEX_NAME_MAP.items():
         try:
-            df = ak.stock_zh_index_value_csindex(symbol="000300")
-        except Exception as e:
-            raise DataSourceError(f"获取指数估值失败: {e}")
-
-    return df
+            df = ak.stock_index_pe_lg(symbol=name)
+            if df is None or df.empty:
+                continue
+            latest = df.iloc[-1]
+            rows.append(
+                {
+                    "指数代码": index_code,
+                    "指数名称": name,
+                    "市盈率": float(latest.iloc[3]),
+                    "市盈率分位": float(latest.iloc[4]),
+                    "日期": latest.iloc[0],
+                }
+            )
+        except Exception:
+            pass
+    if not rows:
+        raise DataSourceError("获取指数估值失败")
+    return pd.DataFrame(rows)
 
 
 def show_valuation():
     """展示主要指数估值一览。"""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("  主要指数估值一览")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
+
+    try:
+        val_df = _get_index_valuation()
+    except DataSourceError as e:
+        print(f"  暂无指数估值数据: {e}")
+        return
+
+    if val_df.empty:
+        print("  暂无指数估值数据，请检查网络或数据源")
+        return
 
     rows = []
-    for index_code, info in INDEX_MAP.items():
-        try:
-            _ensure_ak()
-            df = ak.index_value_hist_funddb()
-            latest = df[df["指数代码"] == index_code]
-            if not latest.empty:
-                pe = float(latest["市盈率"].values[0])
-            else:
-                pe = None
-        except Exception:
-            pe = None
+    for _, row in val_df.iterrows():
+        index_code = row["指数代码"]
+        pe = row["市盈率"]
+        pct = row.get("市盈率分位", None)
+        info = INDEX_MAP.get(index_code, {"name": index_code})
 
-        if pe is not None and index_code in PE_HISTORY:
-            pct = _estimate_pe_percentile(pe, PE_HISTORY[index_code])
-            level = (
-                "低估" if pct < 30 else ("高估" if pct > 70 else "合理")
-            )
-            rows.append({
+        if pct is not None:
+            level = "低估" if pct < 30 else ("高估" if pct > 70 else "合理")
+            pct_str = f"{pct}%"
+        else:
+            history = PE_HISTORY.get(index_code)
+            if history:
+                pct = _estimate_pe_percentile(pe, history)
+                level = "低估" if pct < 30 else ("高估" if pct > 70 else "合理")
+                pct_str = f"{pct}%"
+            else:
+                level = "?"
+                pct_str = "?"
+
+        rows.append(
+            {
                 "指数": info["name"],
                 "代码": index_code,
                 "当前PE": round(pe, 2),
-                "历史中位数": PE_HISTORY[index_code]["median"],
-                "分位": f"{pct}%",
+                "历史中位数": PE_HISTORY.get(index_code, {}).get("median", "?"),
+                "分位": pct_str,
                 "状态": level,
-            })
-
-    if not rows:
-        print("暂无指数估值数据，请检查网络或数据源")
-        return
+            }
+        )
 
     result = pd.DataFrame(rows)
     print(result.to_string(index=False))
@@ -114,29 +139,33 @@ def show_index_trend(index_code: str, days: int = 180):
     info = INDEX_MAP.get(index_code, {"name": index_code})
     name = info["name"] if isinstance(info, dict) else index_code
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"  {name} ({index_code}) 近期走势")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     try:
         _ensure_ak()
         end_date = date.today().strftime("%Y%m%d")
         start_date = (date.today() - timedelta(days=days)).strftime("%Y%m%d")
         df = ak.stock_zh_index_daily_em(
-            symbol=f"sh{index_code}" if index_code.startswith("000")
+            symbol=f"sh{index_code}"
+            if index_code.startswith("000")
             else f"sz{index_code}"
         )
         if df is None or df.empty:
             print("暂无数据")
             return
 
-        df = df.rename(columns={
-            "date": "date", "close": "close", "open": "open",
-            "high": "high", "low": "low", "volume": "volume",
-        })
-        available = [c for c in ["date", "close", "open", "high", "low"]
-                     if c in df.columns]
-
+        df = df.rename(
+            columns={
+                "date": "date",
+                "close": "close",
+                "open": "open",
+                "high": "high",
+                "low": "low",
+                "volume": "volume",
+            }
+        )
         if "date" in df.columns:
             df["date"] = pd.to_datetime(df["date"])
             df = df[(df["date"] >= start_date) & (df["date"] <= end_date)]
@@ -155,9 +184,11 @@ def show_index_trend(index_code: str, days: int = 180):
             latest_ma60 = df["ma60"].iloc[-1]
             if pd.notna(latest_ma20) and pd.notna(latest_ma60):
                 trend = "上涨趋势" if latest_ma20 > latest_ma60 else "下跌趋势"
-                print(f"MA20: {latest_ma20:.2f}  |  MA60: {latest_ma60:.2f}  |  {trend}")
+                print(
+                    f"MA20: {latest_ma20:.2f}  |  MA60: {latest_ma60:.2f}  |  {trend}"
+                )
 
-        print(f"\n近20个交易日:")
+        print("\n近20个交易日:")
         recent = df.tail(20).copy()
         cols = [c for c in ["date", "close", "volume"] if c in recent.columns]
         if "date" in recent.columns:
@@ -171,9 +202,7 @@ def show_index_trend(index_code: str, days: int = 180):
 def main():
     parser = argparse.ArgumentParser(description="指数数据查询工具")
     parser.add_argument("--index", type=str, help="指数代码 (如 000300)")
-    parser.add_argument(
-        "--days", type=int, default=180, help="查看天数 (默认 180)"
-    )
+    parser.add_argument("--days", type=int, default=180, help="查看天数 (默认 180)")
     args = parser.parse_args()
 
     if args.index:

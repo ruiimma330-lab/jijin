@@ -30,15 +30,22 @@ def render():
 
     col1, col2 = st.columns(2)
     with col1:
-        fund_code = st.text_input("基金代码 (可选，用于均线/RSI)", value="110020",
-                                   max_chars=6, placeholder="如 110020")
+        fund_code = st.text_input(
+            "基金代码 (可选，用于均线/RSI)",
+            value="110020",
+            max_chars=6,
+            placeholder="如 110020",
+        )
     with col2:
         index_code = st.selectbox(
             "基准指数 (PE估值)",
             ["000300", "000905", "399006", "000688", "000016"],
             format_func=lambda x: {
-                "000300": "沪深300", "000905": "中证500", "399006": "创业板指",
-                "000688": "科创50", "000016": "上证50",
+                "000300": "沪深300",
+                "000905": "中证500",
+                "399006": "创业板指",
+                "000688": "科创50",
+                "000016": "上证50",
             }.get(x, x),
         )
 
@@ -62,13 +69,16 @@ def render():
     # 综合信号大卡片
     overall = result["overall_signal"]
     style = SIGNAL_STYLE.get(overall, SIGNAL_STYLE["N/A"])
-    st.markdown(f"""
-    <div style="padding:20px;border-radius:10px;background:{style['color']}15;
-                border:2px solid {style['color']};text-align:center;margin:10px 0;">
-        <h2>{style['icon']} 综合信号: {overall}</h2>
-        <p style="font-size:1.2em;">{result['suggestion']}</p>
+    st.markdown(
+        f"""
+    <div style="padding:20px;border-radius:10px;background:{style["color"]}15;
+                border:2px solid {style["color"]};text-align:center;margin:10px 0;">
+        <h2>{style["icon"]} 综合信号: {overall}</h2>
+        <p style="font-size:1.2em;">{result.get("suggestion", "请结合各项信号综合判断")}</p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # 分项信号
     st.subheader("📋 信号明细")
@@ -88,25 +98,28 @@ def render():
                     st.metric("历史中位数 PE", f"{median}")
 
                     # PE 仪表盘
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number+delta",
-                        value=pct if pct else 0,
-                        title={"text": "PE 估值分位"},
-                        delta={"reference": 50},
-                        gauge={
-                            "axis": {"range": [0, 100]},
-                            "bar": {"color": "darkblue"},
-                            "steps": [
-                                {"range": [0, 30], "color": "lightgreen"},
-                                {"range": [30, 70], "color": "lightyellow"},
-                                {"range": [70, 100], "color": "lightcoral"},
-                            ],
-                            "threshold": {
-                                "line": {"color": "red", "width": 2},
-                                "thickness": 0.8, "value": pct if pct else 50,
+                    fig = go.Figure(
+                        go.Indicator(
+                            mode="gauge+number+delta",
+                            value=pct if pct else 0,
+                            title={"text": "PE 估值分位"},
+                            delta={"reference": 50},
+                            gauge={
+                                "axis": {"range": [0, 100]},
+                                "bar": {"color": "darkblue"},
+                                "steps": [
+                                    {"range": [0, 30], "color": "lightgreen"},
+                                    {"range": [30, 70], "color": "lightyellow"},
+                                    {"range": [70, 100], "color": "lightcoral"},
+                                ],
+                                "threshold": {
+                                    "line": {"color": "red", "width": 2},
+                                    "thickness": 0.8,
+                                    "value": pct if pct else 50,
+                                },
                             },
-                        },
-                    ))
+                        )
+                    )
                     fig.update_layout(height=300)
                     st.plotly_chart(fig, use_container_width=True)
 
@@ -123,24 +136,27 @@ def render():
             elif name == "RSI":
                 rsi_val = s.get("rsi", 50)
                 if rsi_val is not None:
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number",
-                        value=float(rsi_val),
-                        title={"text": "RSI (14)"},
-                        gauge={
-                            "axis": {"range": [0, 100]},
-                            "bar": {"color": "darkblue"},
-                            "steps": [
-                                {"range": [0, 30], "color": "lightgreen"},
-                                {"range": [30, 70], "color": "lightyellow"},
-                                {"range": [70, 100], "color": "lightcoral"},
-                            ],
-                            "threshold": {
-                                "line": {"color": "red", "width": 2},
-                                "thickness": 0.8, "value": 70,
+                    fig = go.Figure(
+                        go.Indicator(
+                            mode="gauge+number",
+                            value=float(rsi_val),
+                            title={"text": "RSI (14)"},
+                            gauge={
+                                "axis": {"range": [0, 100]},
+                                "bar": {"color": "darkblue"},
+                                "steps": [
+                                    {"range": [0, 30], "color": "lightgreen"},
+                                    {"range": [30, 70], "color": "lightyellow"},
+                                    {"range": [70, 100], "color": "lightcoral"},
+                                ],
+                                "threshold": {
+                                    "line": {"color": "red", "width": 2},
+                                    "thickness": 0.8,
+                                    "value": 70,
+                                },
                             },
-                        },
-                    ))
+                        )
+                    )
                     fig.update_layout(height=250)
                     st.plotly_chart(fig, use_container_width=True)
                 st.caption(s.get("action", ""))
@@ -157,6 +173,7 @@ def render():
         if st.button("🔮 让 AI 解释这些信号", key="ai_signals"):
             try:
                 from app.utils.ai_advisor import get_advisor
+
                 advisor = get_advisor()
                 interpretation = advisor.interpret("signals", result)
                 st.markdown(interpretation)

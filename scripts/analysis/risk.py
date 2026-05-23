@@ -30,11 +30,11 @@ def max_drawdown(nav: pd.Series) -> dict:
     max_dd = drawdown.min()
 
     max_dd_end_idx = drawdown.idxmin()
-    max_dd_start_idx = rolling_max[
-        :max_dd_end_idx
-    ][rolling_max[:max_dd_end_idx] == rolling_max[max_dd_end_idx]].index[-1]
+    max_dd_start_idx = rolling_max[:max_dd_end_idx][
+        rolling_max[:max_dd_end_idx] == rolling_max[max_dd_end_idx]
+    ].index[-1]
 
-    recovery_mask = (drawdown.loc[max_dd_end_idx:] == 0)
+    recovery_mask = drawdown.loc[max_dd_end_idx:] == 0
     recovery_days = 0
     if recovery_mask.any():
         recovery_date = drawdown.loc[max_dd_end_idx:][recovery_mask].index[0]
@@ -51,9 +51,7 @@ def max_drawdown(nav: pd.Series) -> dict:
             in_dd = False
             dd_periods.append((dd_start, i, drawdown.loc[dd_start:i].min()))
 
-    avg_dd = (
-        np.mean([d[2] for d in dd_periods]) if dd_periods else 0
-    )
+    avg_dd = np.mean([d[2] for d in dd_periods]) if dd_periods else 0
 
     return {
         "max_drawdown": round(max_dd * 100, 2),
@@ -83,13 +81,9 @@ def cvar(returns: pd.Series, confidence: float = 0.95) -> float:
 def rolling_risk(nav_df: pd.DataFrame, window: int = 60) -> pd.DataFrame:
     """计算滚动风险指标。"""
     df = nav_df.copy()
-    df["rolling_vol"] = (
-        df["daily_return"].rolling(window).std() * np.sqrt(252) * 100
-    )
+    df["rolling_vol"] = df["daily_return"].rolling(window).std() * np.sqrt(252) * 100
     df["rolling_max_dd"] = (
-        df["nav"].rolling(window).apply(
-            lambda x: (x / x.cummax() - 1).min() * 100
-        )
+        df["nav"].rolling(window).apply(lambda x: (x / x.cummax() - 1).min() * 100)
     )
     return df
 
@@ -102,7 +96,8 @@ def risk_report(fund_code: str) -> dict:
     if returns.empty:
         return {"error": "数据不足"}
 
-    dd_info = max_drawdown(nav_df["nav"])
+    nav_series = nav_df.set_index("date")["nav"]
+    dd_info = max_drawdown(nav_series)
 
     annual_vol = returns.std() * np.sqrt(252)
 
@@ -127,13 +122,12 @@ def risk_report(fund_code: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="基金风险分析工具")
-    parser.add_argument("--code", type=str, default="110020",
-                        help="基金代码")
+    parser.add_argument("--code", type=str, default="110020", help="基金代码")
     args = parser.parse_args()
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  风险评估报告 — {args.code}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     try:
         report = risk_report(args.code)
@@ -142,26 +136,30 @@ def main():
             print(f"  [ERR] {report['error']}")
             return
 
-        print(f"\n[CHART] 波动率指标:")
+        print("\n[CHART] 波动率指标:")
         print(f"  年化波动率: {report['annual_volatility']}%")
         print(f"  日均波动率: {report['daily_volatility']}%")
-        print(f"  偏度: {report['skewness']}  {'(左偏=暴跌风险)' if report['skewness'] < -0.5 else ''}")
-        print(f"  峰度: {report['kurtosis']}  {'(尖峰=极端值风险)' if report['kurtosis'] > 2 else ''}")
+        print(
+            f"  偏度: {report['skewness']}  {'(左偏=暴跌风险)' if report['skewness'] < -0.5 else ''}"
+        )
+        print(
+            f"  峰度: {report['kurtosis']}  {'(尖峰=极端值风险)' if report['kurtosis'] > 2 else ''}"
+        )
 
-        print(f"\n[CHART] 回撤指标:")
+        print("\n[CHART] 回撤指标:")
         print(f"  最大回撤: {report['max_drawdown']}%")
         print(f"  回撤区间: {report['max_dd_start']} ~ {report['max_dd_end']}")
         print(f"  恢复天数: {report['recovery_days']} 天")
         print(f"  平均回撤: {report['avg_drawdown']}%")
         print(f"  回撤次数: {report['drawdown_count']}")
 
-        print(f"\n[WARN] 风险价值 (VaR):")
+        print("\n[WARN] 风险价值 (VaR):")
         print(f"  VaR(95%): {report['VaR_95']}%  — 95%把握单日亏损不超过此值")
         print(f"  VaR(99%): {report['VaR_99']}%  — 99%把握单日亏损不超过此值")
         print(f"  CVaR(95%): {report['CVaR_95']}% — 极端情况下的平均亏损")
 
-        print(f"\n[TIP] 解读:")
-        vol = report['annual_volatility']
+        print("\n[TIP] 解读:")
+        vol = report["annual_volatility"]
         if vol < 10:
             print(f"  低波动 ({vol}%)，适合保守型投资者")
         elif vol < 20:
@@ -169,8 +167,8 @@ def main():
         else:
             print(f"  高波动 ({vol}%)，适合进取型投资者")
 
-        dd = abs(report['max_drawdown'])
-        print(f"  最大回撤 {dd}% — 每投1万元，最坏情况亏{int(dd*100)}元")
+        dd = abs(report["max_drawdown"])
+        print(f"  最大回撤 {dd}% — 每投1万元，最坏情况亏{int(dd * 100)}元")
 
     except Exception as e:
         print(f"  [ERR] 分析失败: {e}")

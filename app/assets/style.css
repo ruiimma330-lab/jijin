@@ -46,19 +46,144 @@ html {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* 侧边栏 */
+/* ══════════════════════════════════════════
+   侧边栏 — 深色主题，与主内容明确分隔
+   ══════════════════════════════════════════ */
+
 [data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #1e293b;
+  border-right: 1px solid #334155;
 }
 
-/* Radio 按钮 */
+/* 侧边栏文字 — 全局浅色 */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] h4,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] li,
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] .stCaption {
+  color: #e2e8f0 !important;
+}
+
+/* 侧边栏标题区域 — 与导航列表层级区分 */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+  color: #f1f5f9 !important;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #475569;
+  margin-bottom: 0.75rem;
+}
+
+/* 侧边栏次级文字 */
+[data-testid="stSidebar"] .stCaption,
+[data-testid="stSidebar"] small {
+  color: #94a3b8 !important;
+}
+
+/* ── Radio 导航项 ────────────────────────── */
+
+[data-testid="stSidebar"] .stRadio > div {
+  gap: 0.25rem;
+}
+
 [data-testid="stSidebar"] .stRadio label {
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border-left: 3px solid transparent;
 }
 
 [data-testid="stSidebar"] .stRadio label:hover {
-  background-color: rgba(37, 99, 235, 0.08);
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #f1f5f9;
+}
+
+/* 选中态 — 高亮背景 + 加粗 + 左边框 */
+[data-testid="stSidebar"] .stRadio [data-selected="true"] label,
+[data-testid="stSidebar"] .stRadio label[data-selected="true"] {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+  font-weight: 700;
+  border-left: 3px solid #3b82f6;
+}
+
+/* ── 导航项分隔 ──────────────────────────── */
+
+[data-testid="stSidebar"] hr,
+[data-testid="stSidebar"] .stDivider {
+  border-color: #334155;
+  margin: 0.75rem 0;
+}
+
+/* ── 侧边栏按钮 ──────────────────────────── */
+
+[data-testid="stSidebar"] .stButton > button {
+  background-color: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+  background-color: #475569;
+  color: #f1f5f9;
+  border-color: #64748b;
+}
+
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
+  background-color: #2563eb;
+}
+
+/* ── 侧边栏 Expander / 快捷指令 ─────────── */
+
+[data-testid="stSidebar"] [data-testid="stExpander"] {
+  background: transparent;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+[data-testid="stSidebar"] [data-testid="stExpander"] summary {
+  color: #e2e8f0;
+}
+
+/* ── 侧边栏聊天消息 ─────────────────────── */
+
+[data-testid="stSidebar"] [data-testid="stChatMessage"] {
+  background-color: #334155 !important;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+[data-testid="stSidebar"] [data-testid="stChatMessage--assistant"] {
+  background-color: #1e3a5f !important;
+}
+
+/* ── 侧边栏 Chat Input ──────────────────── */
+
+[data-testid="stSidebar"] [data-testid="stChatInput"] textarea {
+  background-color: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+[data-testid="stSidebar"] [data-testid="stChatInput"] textarea::placeholder {
+  color: #64748b;
 }
 
 /* 数据表格 */
