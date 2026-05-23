@@ -7,7 +7,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 from scripts.strategy.portfolio import optimize_portfolio, efficient_frontier
 
@@ -67,52 +66,64 @@ def render():
             with st.container(border=True):
                 st.markdown(f"**{strategy}**")
                 st.caption(desc.get(strategy, ""))
-                st.metric("年化收益", f"{data['return']*100:.1f}%")
-                st.metric("年化波动", f"{data['volatility']*100:.1f}%")
+                st.metric("年化收益", f"{data['return'] * 100:.1f}%")
+                st.metric("年化波动", f"{data['volatility'] * 100:.1f}%")
                 st.metric("夏普比率", f"{data['sharpe']:.2f}")
 
                 # 小饼图
                 weights = data["weights"]
-                fig = go.Figure(go.Pie(
-                    labels=fund_codes,
-                    values=[max(w, 0.001) for w in weights],
-                    hole=0.5,
-                    textinfo="label+percent",
-                    showlegend=False,
-                ))
+                fig = go.Figure(
+                    go.Pie(
+                        labels=fund_codes,
+                        values=[max(w, 0.001) for w in weights],
+                        hole=0.5,
+                        textinfo="label+percent",
+                        showlegend=False,
+                    )
+                )
                 fig.update_layout(height=200, margin=dict(l=10, r=10, t=10, b=10))
-                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(
+                    fig, use_container_width=True, config={"displayModeBar": False}
+                )
 
     # 权重详情表
     st.subheader("📋 各策略权重")
     weight_data = {"基金代码": fund_codes}
     for strategy, data in result["results"].items():
-        weight_data[strategy] = [f"{w*100:.0f}%" for w in data["weights"]]
+        weight_data[strategy] = [f"{w * 100:.0f}%" for w in data["weights"]]
     st.dataframe(pd.DataFrame(weight_data), use_container_width=True, hide_index=True)
 
     # 有效前沿图
     if ef is not None and not ef.empty:
         st.subheader("📈 有效前沿")
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=ef["volatility"], y=ef["return"],
-            mode="lines", name="有效前沿",
-            line=dict(color="blue", width=2),
-            hovertemplate="波动: %{x:.1f}%<br>收益: %{y:.1f}%<extra></extra>",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=ef["volatility"],
+                y=ef["return"],
+                mode="lines",
+                name="有效前沿",
+                line=dict(color="blue", width=2),
+                hovertemplate="波动: %{x:.1f}%<br>收益: %{y:.1f}%<extra></extra>",
+            )
+        )
 
         # 三种策略点位
         colors = {"最大夏普": "red", "最小方差": "green", "风险平价": "orange"}
         for strategy, data in result["results"].items():
-            fig.add_trace(go.Scatter(
-                x=[data["volatility"] * 100],
-                y=[data["return"] * 100],
-                mode="markers+text",
-                name=strategy,
-                text=[strategy],
-                textposition="top center",
-                marker=dict(size=14, color=colors.get(strategy, "gray"), symbol="diamond"),
-            ))
+            fig.add_trace(
+                go.Scatter(
+                    x=[data["volatility"] * 100],
+                    y=[data["return"] * 100],
+                    mode="markers+text",
+                    name=strategy,
+                    text=[strategy],
+                    textposition="top center",
+                    marker=dict(
+                        size=14, color=colors.get(strategy, "gray"), symbol="diamond"
+                    ),
+                )
+            )
 
         fig.update_layout(
             title="有效前沿 — 三种策略位置",
@@ -128,7 +139,9 @@ def render():
         "不依赖收益预测，更稳健。每半年再平衡一次即可。"
     )
 
-    st.caption("⚠️ 优化结果基于历史数据（最近一年），未来可能偏离。加入债券基金可大幅降低组合波动。")
+    st.caption(
+        "⚠️ 优化结果基于历史数据（最近一年），未来可能偏离。加入债券基金可大幅降低组合波动。"
+    )
 
     # AI 解读
     st.divider()
@@ -136,19 +149,26 @@ def render():
         if st.button("🔮 让 AI 帮我理解优化结果", key="ai_portfolio"):
             try:
                 from app.utils.ai_advisor import get_advisor
+
                 advisor = get_advisor()
-                interpretation = advisor.interpret("portfolio", {
-                    "fund_codes": fund_codes,
-                    "results": {
-                        k: {
-                            "return": f"{v['return']*100:.1f}%",
-                            "volatility": f"{v['volatility']*100:.1f}%",
-                            "sharpe": f"{v['sharpe']:.2f}",
-                            "weights": {c: f"{w*100:.0f}%" for c, w in zip(fund_codes, v["weights"])},
-                        }
-                        for k, v in result["results"].items()
+                interpretation = advisor.interpret(
+                    "portfolio",
+                    {
+                        "fund_codes": fund_codes,
+                        "results": {
+                            k: {
+                                "return": f"{v['return'] * 100:.1f}%",
+                                "volatility": f"{v['volatility'] * 100:.1f}%",
+                                "sharpe": f"{v['sharpe']:.2f}",
+                                "weights": {
+                                    c: f"{w * 100:.0f}%"
+                                    for c, w in zip(fund_codes, v["weights"])
+                                },
+                            }
+                            for k, v in result["results"].items()
+                        },
                     },
-                })
+                )
                 st.markdown(interpretation)
             except ImportError:
                 st.info("AI 顾问模块尚未初始化，请先完成 Phase 3。")

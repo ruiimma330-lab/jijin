@@ -12,13 +12,13 @@
 import argparse
 import os
 import sys
-from datetime import date, timedelta
-
 import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from scripts.data.client import get_fund_list, get_fund_nav, get_fund_ranking
+
+SCORE_WEIGHTS = {"return": 0.4, "drawdown": 0.3, "sharpe": 0.3}
 
 
 def calculate_metrics(nav_df: pd.DataFrame) -> dict:
@@ -27,6 +27,8 @@ def calculate_metrics(nav_df: pd.DataFrame) -> dict:
         return {}
 
     nav = nav_df["nav"]
+    if "daily_return" not in nav_df.columns:
+        return {}
     returns = nav_df["daily_return"].dropna()
 
     if returns.empty:
@@ -61,6 +63,21 @@ def calculate_metrics(nav_df: pd.DataFrame) -> dict:
     }
 
 
+def _score_fund(df: pd.DataFrame, top_n: int) -> pd.DataFrame:
+    """对筛选后的基金计算综合评分并排序。
+
+    评分 = 年化收益×权重 - 最大回撤×权重 + 夏普比率×15×权重
+    """
+    df = df.copy()
+    df["score"] = (
+        df["annual_return"] * SCORE_WEIGHTS["return"]
+        - df["max_drawdown"].abs() * SCORE_WEIGHTS["drawdown"]
+        + df["sharpe_ratio"] * 15 * SCORE_WEIGHTS["sharpe"]
+    )
+    df = df.sort_values("score", ascending=False).head(top_n)
+    return df.drop(columns=["score"]).reset_index(drop=True)
+
+
 def scan_funds(
     fund_type: str = "mix",
     min_return: float = 0,
@@ -80,13 +97,15 @@ def scan_funds(
     Returns:
         包含各项指标的 DataFrame
     """
-    print(f"[SCAN] 正在扫描基金 (类型={fund_type}, 收益>={min_return}%, "
-          f"回撤<={max_drawdown}%, 夏普>={min_sharpe})...")
+    print(
+        f"[SCAN] 正在扫描基金 (类型={fund_type}, 收益>={min_return}%, "
+        f"回撤<={max_drawdown}%, 夏普>={min_sharpe})..."
+    )
 
     try:
         ranking = get_fund_ranking(fund_type=fund_type, top_n=50)
-    except Exception:
-        print("[WARN] 无法获取排名数据，尝试从基金列表逐个获取...")
+    except Exception as e:
+        print(f"[WARN] 无法获取排名数据: {e}，尝试从基金列表逐个获取...")
         fund_list = get_fund_list(fund_type=fund_type)
         codes = fund_list["code"].head(30).tolist()
         ranking = pd.DataFrame({"code": codes})
@@ -96,7 +115,7 @@ def scan_funds(
     for i, row in ranking.head(30).iterrows():
         code = row["code"]
         name = row.get("name", "")
-        print(f"  [{i+1}/{total}] 分析 {code} {name}...", end="\r")
+        print(f"  [{i + 1}/{total}] 分析 {code} {name}...", end="\r")
         try:
             nav_df = get_fund_nav(code)
             metrics = calculate_metrics(nav_df)
@@ -104,7 +123,8 @@ def scan_funds(
                 metrics["code"] = code
                 metrics["name"] = name
                 results.append(metrics)
-        except Exception:
+        except Exception as e:
+            print(f"\n  [WARN] 获取 {code} 数据失败: {e}")
             continue
 
     print(f"\n  完成，成功分析 {len(results)} 只基金")
@@ -119,26 +139,19 @@ def scan_funds(
         & (df["sharpe_ratio"] >= min_sharpe)
     ].copy()
 
-    filtered["score"] = (
-        filtered["annual_return"] * 0.4
-        - filtered["max_drawdown"].abs() * 0.3
-        + filtered["sharpe_ratio"] * 15 * 0.3
-    )
-    filtered = filtered.sort_values("score", ascending=False).head(top_n)
-
-    return filtered.drop(columns=["score"]).reset_index(drop=True)
+    return _score_fund(filtered, top_n)
 
 
 def main():
     parser = argparse.ArgumentParser(description="基金多维度筛选器")
-    parser.add_argument("--type", default="mix",
-                        choices=["stock", "bond", "mix", "index", "all"])
-    parser.add_argument("--min-return", type=float, default=0,
-                        help="最低年化收益(%%)")
-    parser.add_argument("--max-drawdown", type=float, default=100,
-                        help="最大可接受回撤(%%)")
-    parser.add_argument("--min-sharpe", type=float, default=0,
-                        help="最低夏普比率")
+    parser.add_argument(
+        "--type", default="mix", choices=["stock", "bond", "mix", "index", "all"]
+    )
+    parser.add_argument("--min-return", type=float, default=0, help="最低年化收益(%%)")
+    parser.add_argument(
+        "--max-drawdown", type=float, default=100, help="最大可接受回撤(%%)"
+    )
+    parser.add_argument("--min-sharpe", type=float, default=0, help="最低夏普比率")
     parser.add_argument("--top", type=int, default=20, help="返回前N名")
     args = parser.parse_args()
 
@@ -154,13 +167,13 @@ def main():
         print("\n没有找到符合条件的基金，试试放宽条件。")
         return
 
-    print(f"\n{'='*90}")
+    print(f"\n{'=' * 90}")
     print(f"  筛选结果 (Top {len(result)})")
-    print(f"{'='*90}")
+    print(f"{'=' * 90}")
     print(result.to_string(index=False))
 
-    print(f"\n[TIP] 历史业绩不代表未来。筛选只是第一步，还需要深入了解。")
-    print(f"[TIP] 推荐: 宽基指数基金(如沪深300)对新手更友好，费率低、确定性高。")
+    print("\n[TIP] 历史业绩不代表未来。筛选只是第一步，还需要深入了解。")
+    print("[TIP] 推荐: 宽基指数基金(如沪深300)对新手更友好，费率低、确定性高。")
 
 
 if __name__ == "__main__":

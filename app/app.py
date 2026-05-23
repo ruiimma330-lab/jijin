@@ -33,13 +33,30 @@ def load_css():
 # ── Session 初始化 ───────────────────────────────────
 
 FUNCTIONS = {
-    "scanner":  {"icon": "🔍", "label": "基金筛选",   "desc": "从几千只基金中按条件筛选"},
-    "signals":  {"icon": "📊", "label": "市场信号",   "desc": "PE估值 + 均线 + RSI 综合判断"},
-    "portfolio":{"icon": "🎯", "label": "组合优化",   "desc": "最优资产配置方案"},
-    "performance":{"icon":"📈","label": "业绩归因",   "desc": "收益来源拆解 Alpha/Beta"},
-    "risk":     {"icon": "⚠️", "label": "风险评估",   "desc": "VaR + 最大回撤 + 波动率"},
-    "backtest": {"icon": "⏳", "label": "策略回测",   "desc": "定投 vs 一次性 vs 网格"},
-    "portfolio_upload": {"icon": "💼", "label": "我的持仓", "desc": "上传CSV，诊断持仓健康度"},
+    "scanner": {"icon": "🔍", "label": "基金筛选", "desc": "从几千只基金中按条件筛选"},
+    "signals": {
+        "icon": "📊",
+        "label": "市场信号",
+        "desc": "PE估值 + 均线 + RSI 综合判断",
+    },
+    "portfolio": {"icon": "🎯", "label": "组合优化", "desc": "最优资产配置方案"},
+    "performance": {
+        "icon": "📈",
+        "label": "业绩归因",
+        "desc": "收益来源拆解 Alpha/Beta",
+    },
+    "risk": {"icon": "⚠️", "label": "风险评估", "desc": "VaR + 最大回撤 + 波动率"},
+    "backtest": {"icon": "⏳", "label": "策略回测", "desc": "定投 vs 一次性 vs 网格"},
+    "portfolio_upload": {
+        "icon": "💼",
+        "label": "我的持仓",
+        "desc": "上传CSV，诊断持仓健康度",
+    },
+    "newcomer": {
+        "icon": "🎓",
+        "label": "新手引导",
+        "desc": "零基础入门，从开户到第一笔交易",
+    },
 }
 
 VIEWS = {
@@ -54,7 +71,14 @@ TEMPLATE_PARAMS = {
     "performance": {"view_name": "performance", "import_mod": "04_performance"},
     "risk": {"view_name": "risk", "import_mod": "05_risk_report"},
     "backtest": {"view_name": "backtest", "import_mod": "06_backtest"},
-    "portfolio_upload": {"view_name": "portfolio_upload", "import_mod": "07_my_portfolio"},
+    "portfolio_upload": {
+        "view_name": "portfolio_upload",
+        "import_mod": "07_my_portfolio",
+    },
+    "newcomer": {
+        "view_name": "newcomer",
+        "import_mod": "09_newcomer_guide",
+    },
 }
 
 
@@ -73,14 +97,18 @@ def init_session():
 
 # ── 市场状态条 ───────────────────────────────────────
 
+
 @st.cache_data(ttl=300, show_spinner=False)
 def get_market_bar() -> pd.DataFrame:
     """获取主要指数实时行情（缓存5分钟）。"""
     try:
         import akshare as ak
+
         indices = [
-            ("sh000001", "上证指数"), ("sz399001", "深证成指"),
-            ("sh000300", "沪深300"), ("sz399006", "创业板指"),
+            ("sh000001", "上证指数"),
+            ("sz399001", "深证成指"),
+            ("sh000300", "沪深300"),
+            ("sz399006", "创业板指"),
         ]
         rows = []
         for symbol, name in indices:
@@ -132,6 +160,7 @@ def render_market_bar():
 
 # ── 功能卡片 ─────────────────────────────────────────
 
+
 def render_function_cards():
     """3列功能卡片网格。"""
     items = list(FUNCTIONS.items())
@@ -151,6 +180,7 @@ def render_function_cards():
 
 
 # ── AI 面板 (右侧 sidebar) ────────────────────────────
+
 
 def render_ai_panel():
     """常驻 AI 顾问面板。"""
@@ -185,18 +215,24 @@ def render_ai_panel():
         prompt = st.chat_input("问小财任何投资问题...")
 
         # 处理快捷指令
-        if "ai_quick_prompt" in st.session_state and st.session_state["ai_quick_prompt"]:
+        if (
+            "ai_quick_prompt" in st.session_state
+            and st.session_state["ai_quick_prompt"]
+        ):
             prompt = st.session_state.pop("ai_quick_prompt")
 
         if prompt:
             with st.chat_message("user"):
                 st.markdown(prompt)
-            st.session_state["ai_chat_history"].append({"role": "user", "content": prompt})
+            st.session_state["ai_chat_history"].append(
+                {"role": "user", "content": prompt}
+            )
 
             with st.chat_message("assistant"):
                 with st.spinner("小财思考中..."):
                     try:
                         from app.utils.ai_advisor import get_advisor
+
                         advisor = get_advisor()
                         history = [
                             {"role": m["role"], "content": m["content"]}
@@ -220,6 +256,7 @@ def render_ai_panel():
 
 
 # ── 内容区路由 ────────────────────────────────────────
+
 
 def render_content():
     """根据 active_view 渲染对应内容。"""
@@ -286,6 +323,7 @@ def render_dashboard():
 
 
 # ── 主入口 ────────────────────────────────────────────
+
 
 def main():
     load_css()

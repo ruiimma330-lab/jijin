@@ -8,14 +8,14 @@
 import argparse
 import os
 import sys
-from datetime import date, timedelta
-
-import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from scripts.data.client import get_fund_nav, DataSourceError
-from scripts.data.fetch_index import _get_index_valuation, PE_HISTORY, _estimate_pe_percentile
+from scripts.data.fetch_index import (
+    INDEX_NAME_MAP,
+    PE_HISTORY,
+)
 
 try:
     import akshare as ak
@@ -35,13 +35,16 @@ def pe_signal(index_code: str) -> dict:
         return {"signal": "N/A", "reason": f"指数 {index_code} 无历史PE数据"}
 
     try:
-        df = ak.index_value_hist_funddb()
-        latest = df[df["指数代码"] == index_code]
-        if latest.empty:
-            return {"signal": "N/A", "reason": "无法获取当前PE"}
-
-        current_pe = float(latest["市盈率"].values[0])
-        percentile = _estimate_pe_percentile(current_pe, history)
+        name = INDEX_NAME_MAP.get(index_code)
+        if name:
+            df = ak.stock_index_pe_lg(symbol=name)
+            if df is None or df.empty:
+                return {"signal": "N/A", "reason": "无法获取当前PE"}
+            latest = df.iloc[-1]
+            current_pe = float(latest.iloc[3])
+            percentile = float(latest.iloc[4])
+        else:
+            return {"signal": "N/A", "reason": f"指数 {index_code} 暂不支持实时PE查询"}
 
         if percentile < 30:
             signal = "BUY"
@@ -114,7 +117,7 @@ def rsi_signal(nav_df: pd.DataFrame, window: int = 14) -> dict:
     from scripts.utils.indicators import rsi
 
     if len(nav_df) < window + 2:
-        return {"signal": "N/A", "reason": f"数据不足(需{window+2}个交易日以上)"}
+        return {"signal": "N/A", "reason": f"数据不足(需{window + 2}个交易日以上)"}
 
     rsi_series = rsi(nav_df["nav"], window)
     current_rsi = rsi_series.iloc[-1]
@@ -157,7 +160,6 @@ def composite_signal(fund_code: str = None, index_code: str = "000300") -> dict:
 
     buy_count = sum(1 for s in signals.values() if s.get("signal") == "BUY")
     sell_count = sum(1 for s in signals.values() if s.get("signal") == "SELL")
-    hold_count = sum(1 for s in signals.values() if s.get("signal") == "HOLD")
 
     if buy_count >= 2:
         overall = "BUY"
@@ -176,31 +178,39 @@ def composite_signal(fund_code: str = None, index_code: str = "000300") -> dict:
     }
 
 
-def main():
-    parser = argparse.ArgumentParser(description="市场择时信号")
-    parser.add_argument("--code", type=str, help="基金代码(用于均线/RSI)")
-    parser.add_argument("--index", type=str, default="000300",
-                        help="指数代码(用于PE估值)")
-    args = parser.parse_args()
-
-    print(f"\n{'='*60}")
-    print(f"  市场择时信号")
-    print(f"{'='*60}\n")
-
-    result = composite_signal(args.code, args.index)
-
+def _print_signals(result: dict) -> None:
+    """打印择时信号结果（从 main() 提取）。"""
     print(f"[SIG] 综合信号: {result['overall_signal']}")
     print(f"[TIP] 建议: {result['suggestion']}")
 
     for name, s in result["signals"].items():
         signal = s.get("signal", "?")
-        tag = {"BUY": "[BUY]", "SELL": "[SELL]", "HOLD": "[HOLD]", "WAIT": "[WAIT]"}.get(
-            signal, "[?]"
-        )
+        tag = {
+            "BUY": "[BUY]",
+            "SELL": "[SELL]",
+            "HOLD": "[HOLD]",
+            "WAIT": "[WAIT]",
+        }.get(signal, "[?]")
         print(f"\n{tag} [{name}]: {signal}")
         for k, v in s.items():
             if k != "signal":
                 print(f"   {k}: {v}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="市场择时信号")
+    parser.add_argument("--code", type=str, help="基金代码(用于均线/RSI)")
+    parser.add_argument(
+        "--index", type=str, default="000300", help="指数代码(用于PE估值)"
+    )
+    args = parser.parse_args()
+
+    print(f"\n{'=' * 60}")
+    print("  市场择时信号")
+    print(f"{'=' * 60}\n")
+
+    result = composite_signal(args.code, args.index)
+    _print_signals(result)
 
 
 if __name__ == "__main__":

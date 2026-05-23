@@ -24,9 +24,11 @@ uv run jupyter notebook notebooks/
 uv run pytest tests/ -v                    # 全部测试
 uv run pytest tests/test_indicators.py -v  # 单个测试文件
 uv run pytest tests/ -v -k "test_rsi"      # 按关键字筛选
+uv run pytest tests/ -v --cov=scripts --cov-report=term-missing  # 含覆盖率
 
 # 代码检查
 uv run ruff check .
+uv run ruff format --check .               # 格式检查
 
 # CLI 脚本 (可独立运行，也通过 Web 界面调用)
 uv run python scripts/data/fetch_fund.py                     # 基金排行
@@ -87,28 +89,42 @@ knowledge/                  # 知识库 (Markdown 文档，AI RAG 数据源)
 ├── 05-投资策略/            # 定投、网格、资产配置
 └── 06-风险管理/            # 风险认知、仓位管理
 
+notebooks/                  # Jupyter 交互教程
+├── 00-白话入门.ipynb
+├── 01-你的第一笔基金数据.ipynb
+├── 02-基金对比与筛选.ipynb
+├── 03-定投策略回测.ipynb
+├── 04-构建投资组合.ipynb
+└── 05-市场估值分析.ipynb
+
+data/
+├── cache/                  # 数据缓存 (gitignored)
+└── output/                 # 输出结果 (gitignored)
+
 tests/
-├── test_indicators.py      # 技术指标手算值验证 + 不可变性
+├── test_indicators.py      # 技术指标: SMA/EMA/MACD/RSI/布林带/KDJ/波动率/夏普/回撤
 ├── test_correlation.py     # 相关性矩阵 + 解读逻辑边界
-├── test_portfolio.py       # 组合优化
-├── test_backtest.py        # 回测结果正确性
-├── test_signals.py         # 择时信号逻辑
-└── test_risk.py            # 风险指标计算
+├── test_portfolio.py       # 组合优化 (最大夏普/最小方差/风险平价/有效前沿)
+├── test_backtest.py        # DCA/一次性/网格回测
+├── test_signals.py         # 均线信号 + RSI信号
+└── test_risk.py            # 最大回撤/VaR/CVaR/滚动波动率
 ```
 
 **Web 界面路由机制**: 
 - 单页应用，`st.session_state.active_view` 控制当前视图
-- 仪表盘: `render_dashboard()` + `render_function_cards()` (3列卡片网格)
+- `FUNCTIONS` dict 定义功能卡片列表（icon/label/desc），仪表盘渲染为 3 列网格
+- `TEMPLATE_PARAMS` dict 映射卡片 key → `view_name` + `import_mod`（对应 pages/ 下的模块）
 - 功能页: `render_content()` 通过 `__import__(f"app.pages.{mod}", fromlist=["render"])` 动态加载并调用 `mod.render()`
 - AI 面板: `render_ai_panel()` 常驻 sidebar，含聊天+快捷指令
-- 视图映射定义在 `TEMPLATE_PARAMS` dict 中
+- 数据获取用 `@st.cache_data(ttl=300)` 缓存市场数据，避免每次交互重新请求
 
 **数据流**: `client.py` (akshare) → `analysis/` / `strategy/` → `utils/viz.py` (可选) → 输出
 
 **关键约定**:
 - 所有数据通过 `scripts/data/client.py` 获取，统一入口便于切换数据源
 - `client.get_fund_nav()` 是最核心函数，几乎所有分析工具都依赖它
-- 所有指标/分析函数返回新对象，不修改入参（不可变数据模式）
+- `scripts/` 模块通过 `sys.path.insert(0, ...)` 被 CLI 脚本、测试和 Web 层导入（跨层导入的标准方式）
+- 所有指标/分析函数返回新对象，不修改入参（不可变数据模式，使用 `@dataclass(frozen=True)`）
 - 中文注释和终端输出，英文代码标识符
 
 ## AI 配置
@@ -144,11 +160,7 @@ LLM_MODEL=deepseek-v4-pro
 
 ## 测试
 
-- 框架: pytest
-- `test_indicators.py` — 技术指标手算值验证 + 不可变性验证（共 12 个测试函数）
-- `test_correlation.py` — 相关性矩阵边界条件（空输入、单基金、极端值等）
-- `test_backtest.py` — 回测结果正确性（投入/收益/回撤）
-- `test_risk.py` — VaR/CVaR 计算验证
-- `test_signals.py` — 择时信号逻辑
-- `test_portfolio.py` — 组合优化权重约束
-- 测试通过 `sys.path.insert` 导入源码模块（同脚本模式）
+- 框架: pytest, 覆盖率: pytest-cov
+- 测试按类组织（`pytest` class），fixture 在模块顶部定义
+- 所有测试通过 `sys.path.insert(0, ...)` 导入 `scripts/` 中的源码模块（和 `app/app.py` 相同模式）
+- 典型写法: `class TestMovingAverage:` 内含 `def test_sma_basic(self, simple_series):`

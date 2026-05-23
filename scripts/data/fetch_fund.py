@@ -25,9 +25,9 @@ from scripts.data.client import (
 
 def show_ranking(fund_type: str = "all"):
     """打印基金收益排名。"""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"  基金收益排名 ({fund_type})")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     try:
         df = get_fund_ranking(fund_type=fund_type, top_n=20)
         print(df.to_string(index=False))
@@ -37,7 +37,7 @@ def show_ranking(fund_type: str = "all"):
 
 def show_fund_nav(fund_code: str):
     """查看单只基金净值走势摘要。"""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     try:
         df = get_fund_nav(fund_code)
         if df.empty:
@@ -49,19 +49,21 @@ def show_fund_nav(fund_code: str):
         total_return = (latest["nav"] - first["nav"]) / first["nav"] * 100
 
         print(f"  基金 {fund_code} 净值走势")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         print(f"数据范围: {first['date'].date()} ~ {latest['date'].date()}")
         print(f"最新净值: {latest['nav']:.4f}")
         print(f"期初净值: {first['nav']:.4f}")
         print(f"期间收益: {total_return:.2f}%")
-        print(f"最大回撤: {(df['nav'].cummax() - df['nav']).max() / df['nav'].cummax().max() * 100:.2f}%")
+        print(
+            f"最大回撤: {(df['nav'].cummax() - df['nav']).max() / df['nav'].cummax().max() * 100:.2f}%"
+        )
 
-        print(f"\n近20个交易日:")
+        print("\n近20个交易日:")
         recent = df.tail(20)[["date", "nav", "daily_return"]].copy()
         recent["date"] = recent["date"].dt.date
-        recent["daily_return"] = (
-            recent["daily_return"] * 100
-        ).round(2).astype(str) + "%"
+        recent["daily_return"] = (recent["daily_return"] * 100).round(2).astype(
+            str
+        ) + "%"
         recent["nav"] = recent["nav"].round(4)
         print(recent.to_string(index=False))
 
@@ -71,15 +73,13 @@ def show_fund_nav(fund_code: str):
 
 def show_fund_list():
     """打印基金列表。"""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("  公募基金列表 (前50只)")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     try:
         df = get_fund_list().head(50)
         if "establish_date" in df.columns:
-            df["establish_date"] = pd.to_datetime(
-                df["establish_date"]
-            ).dt.date
+            df["establish_date"] = pd.to_datetime(df["establish_date"]).dt.date
         print(df.to_string(index=False))
     except DataSourceError as e:
         print(f"数据获取失败: {e}")
@@ -106,7 +106,9 @@ def main():
     parser.add_argument("--list", action="store_true", help="列出基金列表")
     parser.add_argument("--search", type=str, help="搜索基金名称")
     parser.add_argument(
-        "--type", type=str, default="all",
+        "--type",
+        type=str,
+        default="all",
         choices=["all", "stock", "bond", "mix", "money", "index"],
         help="基金类型 (默认: all)",
     )

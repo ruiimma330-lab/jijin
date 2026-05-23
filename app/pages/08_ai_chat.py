@@ -16,7 +16,7 @@ def render():
     if "ai_chat_history" not in st.session_state:
         st.session_state["ai_chat_history"] = []
 
-    # 快捷提问
+    # 快捷提问（selectbox + 发送按钮，避免大量状态按钮）
     st.subheader("💡 试试这些问题")
     quick_questions = [
         "什么是基金净值？用简单的话解释",
@@ -28,13 +28,21 @@ def render():
         "基金组合应该买几只？",
     ]
 
-    cols = st.columns(3)
-    for i, q in enumerate(quick_questions):
-        with cols[i % 3]:
-            if st.button(q, key=f"qq_{i}", use_container_width=True):
-                # 直接作为用户消息处理
-                st.session_state["pending_question"] = q
-                st.rerun()
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        selected_question = st.selectbox(
+            "选择一个预设问题",
+            quick_questions,
+            index=None,
+            placeholder="点击选择一个问题...",
+            label_visibility="collapsed",
+        )
+    with col2:
+        if st.button(
+            "📤 发送", use_container_width=True, disabled=(selected_question is None)
+        ):
+            st.session_state["pending_question"] = selected_question
+            st.rerun()
 
     st.divider()
 
@@ -61,6 +69,7 @@ def render():
             with st.spinner("小财正在思考..."):
                 try:
                     from app.utils.ai_advisor import get_advisor
+
                     advisor = get_advisor()
 
                     # 构建历史消息
@@ -75,7 +84,9 @@ def render():
                         {"role": "assistant", "content": reply}
                     )
                 except ImportError:
-                    st.warning("AI 顾问模块加载失败，请确保 app/utils/ai_advisor.py 存在。")
+                    st.warning(
+                        "AI 顾问模块加载失败，请确保 app/utils/ai_advisor.py 存在。"
+                    )
                 except Exception as e:
                     st.error(f"AI 顾问出错了: {e}")
                     st.info(

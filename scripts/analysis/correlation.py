@@ -51,7 +51,9 @@ def compute_correlation(fund_codes: list[str]) -> pd.DataFrame:
     return corr_matrix
 
 
-def plot_correlation_heatmap(corr_matrix: pd.DataFrame, title: str = "基金相关性热力图"):
+def plot_correlation_heatmap(
+    corr_matrix: pd.DataFrame, title: str = "基金相关性热力图"
+):
     """绘制相关性热力图。"""
     plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
     plt.rcParams["axes.unicode_minus"] = False
@@ -60,9 +62,17 @@ def plot_correlation_heatmap(corr_matrix: pd.DataFrame, title: str = "基金相�
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool), k=1)
 
     sns.heatmap(
-        corr_matrix, annot=True, fmt=".2f", cmap="RdYlBu_r",
-        vmin=-1, vmax=1, center=0, square=True,
-        mask=mask, linewidths=1, cbar_kws={"shrink": 0.8},
+        corr_matrix,
+        annot=True,
+        fmt=".2f",
+        cmap="RdYlBu_r",
+        vmin=-1,
+        vmax=1,
+        center=0,
+        square=True,
+        mask=mask,
+        linewidths=1,
+        cbar_kws={"shrink": 0.8},
         ax=ax,
     )
     ax.set_title(title, fontsize=14, fontweight="bold", pad=15)
@@ -107,7 +117,8 @@ def interpret_correlation(corr_matrix: pd.DataFrame) -> list[str]:
 def main():
     parser = argparse.ArgumentParser(description="资产相关性分析")
     parser.add_argument(
-        "--codes", type=str,
+        "--codes",
+        type=str,
         default="110020,001632,050027,000001",
         help="基金代码，逗号分隔",
     )
@@ -115,9 +126,9 @@ def main():
 
     fund_codes = [c.strip() for c in args.codes.split(",")]
 
-    print(f"\n{'='*70}")
-    print(f"  资产相关性分析")
-    print(f"{'='*70}")
+    print(f"\n{'=' * 70}")
+    print("  资产相关性分析")
+    print(f"{'=' * 70}")
     print(f"  分析基金: {', '.join(fund_codes)}\n")
 
     corr = compute_correlation(fund_codes)
@@ -128,16 +139,16 @@ def main():
     print("  相关性矩阵:")
     print(corr.to_string())
 
-    print(f"\n  📊 解读:")
+    print("\n  📊 解读:")
     insights = interpret_correlation(corr)
     for insight in insights:
         print(f"  {insight}")
 
-    print(f"\n  💡 建议:")
-    print(f"  1. 相关性 > 0.8: 两只基金走势高度同步，只需持有其一")
-    print(f"  2. 相关性 < 0.3: 搭配可有效分散风险")
-    print(f"  3. 理想组合: 包含不同资产类别 (股票+债券+商品)")
-    print(f"  4. 至少加入一只债券基金，可大幅降低组合波动")
+    print("\n  💡 建议:")
+    print("  1. 相关性 > 0.8: 两只基金走势高度同步，只需持有其一")
+    print("  2. 相关性 < 0.3: 搭配可有效分散风险")
+    print("  3. 理想组合: 包含不同资产类别 (股票+债券+商品)")
+    print("  4. 至少加入一只债券基金，可大幅降低组合波动")
 
 
 if __name__ == "__main__":

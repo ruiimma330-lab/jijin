@@ -6,8 +6,6 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
 
 
@@ -53,11 +51,15 @@ def render():
                         st.warning(w)
 
                 platform_name = {
-                    "alipay": "支付宝", "wechat": "微信理财通",
-                    "tiantian": "天天基金", "generic": "通用格式",
+                    "alipay": "支付宝",
+                    "wechat": "微信理财通",
+                    "tiantian": "天天基金",
+                    "generic": "通用格式",
                 }.get(result.platform, result.platform)
 
-                st.success(f"✅ 识别为 **{platform_name}** 格式，共 {len(result.holdings)} 笔持仓")
+                st.success(
+                    f"✅ 识别为 **{platform_name}** 格式，共 {len(result.holdings)} 笔持仓"
+                )
 
                 # 存入 session
                 df = holdings_to_dataframe(result.holdings)
@@ -81,7 +83,9 @@ def render():
     cols[0].metric("💰 持仓总市值", f"{total_amount:,.0f} 元")
     cols[1].metric("📊 持有基金数", f"{len(holdings)} 只")
     cols[2].metric("📈 昨日收益", f"{total_daily:+,.2f} 元" if total_daily else "?")
-    cols[3].metric("🗂️ 累计收益", f"{total_total_return:+,.2f} 元" if total_total_return else "?")
+    cols[3].metric(
+        "🗂️ 累计收益", f"{total_total_return:+,.2f} 元" if total_total_return else "?"
+    )
 
     # 持仓表格
     st.subheader("📋 持仓明细")
@@ -111,15 +115,16 @@ def render():
 
     issues = []
     if len(holdings) == 1:
-        issues.append("⚠️ 只持有 1 只基金，风险过于集中。建议至少持有 3-5 只不同类型基金。")
+        issues.append(
+            "⚠️ 只持有 1 只基金，风险过于集中。建议至少持有 3-5 只不同类型基金。"
+        )
     elif len(holdings) > 10:
         issues.append("⚠️ 持有超过 10 只基金，可能过于分散。建议精简到 5-8 只。")
 
     # 检查是否有债券基金（从名称猜测）
     bond_keywords = ["债", "债券", "bond", "纯债", "固收"]
     has_bond = any(
-        any(kw in (h.fund_name or "").lower() for kw in bond_keywords)
-        for h in holdings
+        any(kw in (h.fund_name or "").lower() for kw in bond_keywords) for h in holdings
     )
     if not has_bond:
         issues.append("💡 未检测到债券类基金。加入债券基金可以有效降低组合波动。")
@@ -146,7 +151,9 @@ def render():
     selected = st.selectbox(
         "选择一只基金查看详情",
         codes,
-        format_func=lambda c: f"{c} — {next((h.fund_name for h in holdings if h.fund_code == c), '')}",
+        format_func=lambda c: (
+            f"{c} — {next((h.fund_name for h in holdings if h.fund_code == c), '')}"
+        ),
     )
 
     if selected and st.button("📊 查看风险评估"):
@@ -159,6 +166,7 @@ def render():
         if st.button("🔮 让 AI 诊断我的持仓健康度", key="ai_holding", type="primary"):
             try:
                 from app.utils.ai_advisor import get_advisor
+
                 advisor = get_advisor()
 
                 summary = {
@@ -174,7 +182,9 @@ def render():
                         for h in holdings
                     ],
                     "昨日收益": f"{total_daily:+,.2f}" if total_daily else "未知",
-                    "累计收益": f"{total_total_return:+,.2f}" if total_total_return else "未知",
+                    "累计收益": f"{total_total_return:+,.2f}"
+                    if total_total_return
+                    else "未知",
                 }
 
                 interpretation = advisor.interpret("portfolio", summary)

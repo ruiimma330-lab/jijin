@@ -9,9 +9,7 @@ import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
 
-matplotlib.rcParams["font.sans-serif"] = [
-    "Microsoft YaHei", "SimHei", "DejaVu Sans"
-]
+matplotlib.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
 matplotlib.rcParams["axes.unicode_minus"] = False
 
 COLORS = {
@@ -43,26 +41,41 @@ def plot_nav(
     ax.set_facecolor(COLORS["bg"])
 
     ax.plot(
-        df["date"], df["nav"],
-        color=COLORS["primary"], linewidth=1.5, label="净值", zorder=3,
+        df["date"],
+        df["nav"],
+        color=COLORS["primary"],
+        linewidth=1.5,
+        label="净值",
+        zorder=3,
     )
 
     if show_ma and len(df) >= 20:
         ma20 = df["nav"].rolling(20).mean()
         ax.plot(
-            df["date"], ma20,
-            color=COLORS["secondary"], linewidth=1, alpha=0.7, label="MA20",
+            df["date"],
+            ma20,
+            color=COLORS["secondary"],
+            linewidth=1,
+            alpha=0.7,
+            label="MA20",
         )
     if show_ma and len(df) >= 60:
         ma60 = df["nav"].rolling(60).mean()
         ax.plot(
-            df["date"], ma60,
-            color=COLORS["purple"], linewidth=1, alpha=0.7, label="MA60",
+            df["date"],
+            ma60,
+            color=COLORS["purple"],
+            linewidth=1,
+            alpha=0.7,
+            label="MA60",
         )
 
     ax.fill_between(
-        df["date"], df["nav"].min(), df["nav"],
-        alpha=0.05, color=COLORS["primary"],
+        df["date"],
+        df["nav"].min(),
+        df["nav"],
+        alpha=0.05,
+        color=COLORS["primary"],
     )
 
     ax.set_title(title, fontsize=14, fontweight="bold", pad=15)
@@ -91,19 +104,30 @@ def plot_return_distribution(
     returns_pct = daily_returns.dropna() * 100
 
     ax1.hist(
-        returns_pct, bins=50, color=COLORS["primary"],
-        edgecolor="white", alpha=0.8,
+        returns_pct,
+        bins=50,
+        color=COLORS["primary"],
+        edgecolor="white",
+        alpha=0.8,
     )
     ax1.axvline(0, color=COLORS["red"], linestyle="--", alpha=0.5)
-    ax1.axvline(returns_pct.mean(), color=COLORS["secondary"],
-                linestyle="-", alpha=0.8, label=f'均值 {returns_pct.mean():.2f}%')
+    ax1.axvline(
+        returns_pct.mean(),
+        color=COLORS["secondary"],
+        linestyle="-",
+        alpha=0.8,
+        label=f"均值 {returns_pct.mean():.2f}%",
+    )
     ax1.set_title("日收益率直方图", fontsize=12, fontweight="bold")
     ax1.set_xlabel("日收益率 (%)")
     ax1.set_ylabel("频率")
     ax1.legend()
 
     returns_pct.plot(
-        ax=ax2, color=COLORS["primary"], alpha=0.7, linewidth=0.5,
+        ax=ax2,
+        color=COLORS["primary"],
+        alpha=0.7,
+        linewidth=0.5,
     )
     ax2.axhline(0, color=COLORS["red"], linestyle="--", alpha=0.5)
     ax2.set_title("日收益率时序", fontsize=12, fontweight="bold")
@@ -127,7 +151,10 @@ def plot_drawdown(
         title: 图表标题
     """
     fig, (ax1, ax2) = plt.subplots(
-        2, 1, figsize=figsize, sharex=True,
+        2,
+        1,
+        figsize=figsize,
+        sharex=True,
         gridspec_kw={"height_ratios": [2, 1]},
     )
 
@@ -135,13 +162,20 @@ def plot_drawdown(
     drawdown = (df["nav"] - rolling_max) / rolling_max * 100
 
     ax1.plot(
-        df["date"], df["nav"],
-        color=COLORS["primary"], linewidth=1.5, label="净值",
+        df["date"],
+        df["nav"],
+        color=COLORS["primary"],
+        linewidth=1.5,
+        label="净值",
     )
     ax1.fill_between(
-        df["date"], df["nav"], rolling_max,
+        df["date"],
+        df["nav"],
+        rolling_max,
         where=(df["nav"] < rolling_max),
-        alpha=0.15, color=COLORS["red"], label="回撤区域",
+        alpha=0.15,
+        color=COLORS["red"],
+        label="回撤区域",
     )
     ax1.set_title(title, fontsize=13, fontweight="bold")
     ax1.set_ylabel("单位净值 (元)")
@@ -149,19 +183,27 @@ def plot_drawdown(
     ax1.grid(True, alpha=0.3, linestyle="--")
 
     ax2.fill_between(
-        df["date"], 0, drawdown,
-        color=COLORS["red"], alpha=0.3,
+        df["date"],
+        0,
+        drawdown,
+        color=COLORS["red"],
+        alpha=0.3,
     )
     ax2.plot(
-        df["date"], drawdown,
-        color=COLORS["red"], linewidth=0.8,
+        df["date"],
+        drawdown,
+        color=COLORS["red"],
+        linewidth=0.8,
     )
     ax2.set_ylabel("回撤 (%)")
     ax2.set_xlabel("")
     max_dd = drawdown.min()
     ax2.axhline(
-        max_dd, color=COLORS["gray"], linestyle="--",
-        alpha=0.5, label=f"最大回撤 {max_dd:.1f}%",
+        max_dd,
+        color=COLORS["gray"],
+        linestyle="--",
+        alpha=0.5,
+        label=f"最大回撤 {max_dd:.1f}%",
     )
     ax2.legend(loc="lower left")
     ax2.grid(True, alpha=0.3, linestyle="--")
@@ -188,8 +230,11 @@ def plot_comparison(
         normalized = df["nav"] / df["nav"].iloc[0]
         color = colors_list[i % len(colors_list)]
         ax.plot(
-            df["date"], normalized,
-            color=color, linewidth=1.5, label=name,
+            df["date"],
+            normalized,
+            color=color,
+            linewidth=1.5,
+            label=name,
         )
 
     ax.axhline(1.0, color="black", linestyle="--", alpha=0.3, linewidth=0.8)
@@ -197,9 +242,7 @@ def plot_comparison(
     ax.set_ylabel("累计收益 (基准=1.0)", fontsize=11)
     ax.legend(loc="upper left", frameon=True)
     ax.grid(True, alpha=0.3, linestyle="--")
-    ax.yaxis.set_major_formatter(
-        ticker.FuncFormatter(lambda y, _: f"{y:.2f}")
-    )
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, _: f"{y:.2f}"))
 
     final_returns = []
     for name, df in funds.items():
@@ -207,8 +250,11 @@ def plot_comparison(
         final_returns.append(f"{name}: {ret:+.1f}%")
 
     ax.text(
-        0.02, 0.02, " | ".join(final_returns),
-        transform=ax.transAxes, fontsize=9,
+        0.02,
+        0.02,
+        " | ".join(final_returns),
+        transform=ax.transAxes,
+        fontsize=9,
         bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
     )
 
@@ -231,31 +277,45 @@ def plot_risk_return_scatter(
     fig, ax = plt.subplots(figsize=figsize)
 
     scatter = ax.scatter(
-        stats["annual_volatility"], stats["annual_return"],
+        stats["annual_volatility"],
+        stats["annual_return"],
         c=stats["annual_return"] / stats["annual_volatility"],
-        cmap="RdYlGn", s=80, edgecolors="white", linewidth=1, zorder=5,
+        cmap="RdYlGn",
+        s=80,
+        edgecolors="white",
+        linewidth=1,
+        zorder=5,
     )
 
     for _, row in stats.iterrows():
         ax.annotate(
             row["name"],
             (row["annual_volatility"], row["annual_return"]),
-            fontsize=8, ha="center", va="bottom",
-            textcoords="offset points", xytext=(0, 5),
+            fontsize=8,
+            ha="center",
+            va="bottom",
+            textcoords="offset points",
+            xytext=(0, 5),
         )
 
     volatilities = np.linspace(
         stats["annual_volatility"].min() * 0.8,
-        stats["annual_volatility"].max() * 1.2, 100,
+        stats["annual_volatility"].max() * 1.2,
+        100,
     )
     for sharpe, ls, label in [
-        (0.5, ":", "夏普=0.5"), (1.0, "--", "夏普=1.0"),
+        (0.5, ":", "夏普=0.5"),
+        (1.0, "--", "夏普=1.0"),
         (2.0, "-.", "夏普=2.0"),
     ]:
         ax.plot(
-            volatilities, volatilities * sharpe,
-            color=COLORS["gray"], linestyle=ls,
-            alpha=0.4, label=label, linewidth=0.8,
+            volatilities,
+            volatilities * sharpe,
+            color=COLORS["gray"],
+            linestyle=ls,
+            alpha=0.4,
+            label=label,
+            linewidth=0.8,
         )
 
     ax.set_xlabel("年化波动率 (%)", fontsize=11)

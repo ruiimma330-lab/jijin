@@ -11,8 +11,6 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass, field
-from datetime import date
-from typing import Callable, Optional
 
 import numpy as np
 import pandas as pd
@@ -24,6 +22,7 @@ from scripts.data.client import get_fund_nav, DataSourceError
 @dataclass(frozen=True)
 class BacktestResult:
     """回测结果（不可变）。"""
+
     strategy: str
     fund_code: str
     total_invested: float
@@ -40,42 +39,54 @@ def _compute_metrics(
     nav_df: pd.DataFrame,
     cashflows: pd.DataFrame,
     final_shares: float,
+    final_cash: float = 0.0,
 ) -> dict:
     """从回测数据计算绩效指标。"""
-    final_nav = nav_df["nav"].iloc[-1]
-    final_value = final_shares * final_nav
     total_invested = cashflows["amount"].sum()
+    if total_invested == 0:
+        return {
+            "total_invested": 0,
+            "final_value": 0,
+            "total_return": 0,
+            "annual_return": 0,
+            "max_drawdown": 0,
+            "sharpe_ratio": 0,
+        }
 
-    total_return = (final_value - total_invested) / total_invested * 100
+    final_nav = nav_df["nav"].iloc[-1]
+    final_value = final_shares * final_nav + final_cash
+    gross_invested = cashflows.loc[cashflows["amount"] > 0, "amount"].sum()
+    total_return = (final_value - gross_invested) / gross_invested * 100
 
     nav = nav_df.set_index("date")["nav"]
+    cf_sorted = cashflows.sort_values("date")
+    cf_records = list(cf_sorted.itertuples(index=False, name=None))
+    n_cf = len(cf_records)
+
     values = []
     shares = 0
-    cashflows_sorted = cashflows.sort_values("date")
-
     cf_idx = 0
     for d in nav.index:
-        while cf_idx < len(cashflows_sorted) and cashflows_sorted.iloc[cf_idx]["date"] <= d:
-            shares += cashflows_sorted.iloc[cf_idx]["amount"] / nav.loc[d]
+        while cf_idx < n_cf and cf_records[cf_idx][0] <= d:
+            shares += cf_records[cf_idx][1] / nav.loc[d]
             cf_idx += 1
         values.append(shares * nav.loc[d])
 
-    values_series = pd.Series(values, index=nav.index)
-    daily_returns = values_series.pct_change().dropna()
+    val_series = pd.Series(values, index=nav.index)
+    daily_ret = val_series.pct_change().dropna()
 
     days = (nav.index[-1] - nav.index[0]).days
-    annual_return = (1 + total_return / 100) ** (365 / days) - 1 if days > 0 else 0
+    ann_ret = (1 + total_return / 100) ** (365 / days) - 1 if days > 0 else 0
 
-    dd = (values_series / values_series.cummax() - 1).min() * 100
-
-    ann_vol = daily_returns.std() * np.sqrt(252)
-    sharpe = (annual_return - 0.02) / ann_vol if ann_vol > 0 else 0
+    dd = (val_series / val_series.cummax() - 1).min() * 100
+    ann_vol = daily_ret.std() * np.sqrt(252)
+    sharpe = (ann_ret - 0.02) / ann_vol if ann_vol > 0 else 0
 
     return {
         "total_invested": round(total_invested, 2),
         "final_value": round(final_value, 2),
         "total_return": round(total_return, 2),
-        "annual_return": round(annual_return * 100, 2),
+        "annual_return": round(ann_ret * 100, 2),
         "max_drawdown": round(dd, 2),
         "sharpe_ratio": round(sharpe, 2),
     }
@@ -129,9 +140,7 @@ def backtest_lump(nav_df: pd.DataFrame, amount: float = 10000) -> BacktestResult
     """一次性投资回测 — 期初全仓买入。"""
     first_nav = nav_df["nav"].iloc[0]
     shares = amount / first_nav
-    cashflows_df = pd.DataFrame([
-        {"date": nav_df["date"].iloc[0], "amount": amount}
-    ])
+    cashflows_df = pd.DataFrame([{"date": nav_df["date"].iloc[0], "amount": amount}])
     metrics = _compute_metrics(nav_df, cashflows_df, shares)
 
     return BacktestResult(
@@ -159,30 +168,55 @@ def backtest_grid(
     grid_step = grid_pct / 100
 
     base_nav = nav.iloc[0]
-    base_shares = initial_amount / 2 / base_nav
     cash = initial_amount / 2
-    shares = base_shares
+    shares = initial_amount / 2 / base_nav
 
-    levels = [base_nav * (1 - grid_step * i) for i in range(20)]
-    level_used = {lvl: False for lvl in levels}
+    buy_levels = [base_nav * (1 - grid_step * (i + 1)) for i in range(10)]
+    buy_used = {lvl: False for lvl in buy_levels}
+    sell_levels = [base_nav * (1 + grid_step * (i + 1)) for i in range(10)]
+    sell_used = {lvl: False for lvl in sell_levels}
+    grid_unit = initial_amount * grid_step / 100
+    pending_sells = []
 
-    cashflows = [{"date": nav.index[0], "amount": base_shares * base_nav}]
+    cashflows = [{"date": nav.index[0], "amount": initial_amount / 2}]
 
     for d in nav.index[1:]:
         current_nav = nav.loc[d]
-        for lvl in levels:
-            if current_nav <= lvl and not level_used[lvl]:
-                buy_amount = initial_amount * grid_step / 100
-                if cash >= buy_amount:
-                    shares += buy_amount / current_nav
-                    cash -= buy_amount
-                    level_used[lvl] = True
-                    cashflows.append({"date": d, "amount": buy_amount})
 
-    cashflows_df = pd.DataFrame(cashflows) if cashflows else pd.DataFrame(
-        [{"date": nav.index[0], "amount": 0}]
+        for buy_price, held_shares in list(pending_sells):
+            sell_target = buy_price * (1 + 2 * grid_step)
+            if current_nav >= sell_target:
+                sell_value = held_shares * current_nav
+                shares -= held_shares
+                cash += sell_value
+                cashflows.append({"date": d, "amount": -sell_value})
+                pending_sells.remove((buy_price, held_shares))
+
+        for lvl in buy_levels:
+            if current_nav <= lvl and not buy_used[lvl]:
+                if cash >= grid_unit:
+                    bought = grid_unit / current_nav
+                    shares += bought
+                    cash -= grid_unit
+                    buy_used[lvl] = True
+                    pending_sells.append((lvl, bought))
+                    cashflows.append({"date": d, "amount": grid_unit})
+
+        for lvl in sell_levels:
+            if current_nav >= lvl and not sell_used[lvl]:
+                if shares * current_nav >= grid_unit:
+                    sold = grid_unit / current_nav
+                    shares -= sold
+                    cash += grid_unit
+                    sell_used[lvl] = True
+                    cashflows.append({"date": d, "amount": -grid_unit})
+
+    cashflows_df = (
+        pd.DataFrame(cashflows)
+        if cashflows
+        else pd.DataFrame([{"date": nav.index[0], "amount": 0}])
     )
-    metrics = _compute_metrics(nav_df, cashflows_df, shares)
+    metrics = _compute_metrics(nav_df, cashflows_df, shares, final_cash=cash)
 
     return BacktestResult(
         strategy=f"网格交易(间距{grid_pct}%)",
@@ -199,9 +233,9 @@ def compare_strategies(
     monthly_amount: float = 1000,
 ) -> None:
     """对比多种策略在同一只基金上的表现。"""
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print(f"  策略回测对比 — 基金 {fund_code}")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
     try:
         nav_df = get_fund_nav(fund_code)
@@ -227,38 +261,43 @@ def compare_strategies(
     r3 = backtest_dca(nav_df, monthly_amount / 4, "weekly")
     results.append(r3)
 
-    print(f"  {'策略':<20} {'总投入':>10} {'最终资产':>12} "
-          f"{'总收益':>8} {'年化':>8} {'最大回撤':>8} {'夏普':>6}")
-    print(f"  {'-'*76}")
+    print(
+        f"  {'策略':<20} {'总投入':>10} {'最终资产':>12} "
+        f"{'总收益':>8} {'年化':>8} {'最大回撤':>8} {'夏普':>6}"
+    )
+    print(f"  {'-' * 76}")
 
     for r in results:
-        print(f"  {r.strategy:<20} {r.total_invested:>10,.0f} "
-              f"{r.final_value:>12,.0f} {r.total_return:>7.1f}% "
-              f"{r.annual_return:>7.1f}% {r.max_drawdown:>7.1f}% "
-              f"{r.sharpe_ratio:>6.2f}")
+        print(
+            f"  {r.strategy:<20} {r.total_invested:>10,.0f} "
+            f"{r.final_value:>12,.0f} {r.total_return:>7.1f}% "
+            f"{r.annual_return:>7.1f}% {r.max_drawdown:>7.1f}% "
+            f"{r.sharpe_ratio:>6.2f}"
+        )
 
-    print(f"\n  [TIP] 分析:")
+    print("\n  [TIP] 分析:")
     best = max(results, key=lambda x: x.total_return)
     print(f"  总收益最高: {best.strategy} ({best.total_return:.1f}%)")
 
     best_sharpe = max(results, key=lambda x: x.sharpe_ratio)
-    print(f"  风险调整后最佳: {best_sharpe.strategy} (夏普 {best_sharpe.sharpe_ratio:.2f})")
+    print(
+        f"  风险调整后最佳: {best_sharpe.strategy} (夏普 {best_sharpe.sharpe_ratio:.2f})"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(description="基金策略回测引擎")
     parser.add_argument("--code", type=str, default="110020", help="基金代码")
     parser.add_argument(
-        "--strategy", type=str, default="compare",
+        "--strategy",
+        type=str,
+        default="compare",
         choices=["compare", "dca", "lump", "grid"],
         help="策略类型 (默认 compare 对比全部)",
     )
-    parser.add_argument("--amount", type=float, default=10000,
-                        help="一次性投入金额")
-    parser.add_argument("--monthly", type=float, default=1000,
-                        help="每月定投金额")
-    parser.add_argument("--grid-pct", type=float, default=5.0,
-                        help="网格间距(%)")
+    parser.add_argument("--amount", type=float, default=10000, help="一次性投入金额")
+    parser.add_argument("--monthly", type=float, default=1000, help="每月定投金额")
+    parser.add_argument("--grid-pct", type=float, default=5.0, help="网格间距(%)")
     args = parser.parse_args()
 
     if args.strategy == "compare":
